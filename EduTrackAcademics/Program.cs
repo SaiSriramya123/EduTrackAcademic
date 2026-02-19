@@ -1,11 +1,16 @@
+using EduTrackAcademics.Data;
+using EduTrackAcademics.Dummy;
+using EduTrackAcademics.Repository;
+using EduTrackAcademics.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using EduTrackAcademics.Data;
+using EduTrackAcademics.Repository;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<EduTrackAcademicsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EduTrackAcademicsContext") ?? throw new InvalidOperationException("Connection string 'EduTrackAcademicsContext' not found.")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ICoordinatorService, CoordinatorService>(); builder.Services.AddScoped<ICoordinatorrepo, Coordinatorrepo>(); builder.Services.AddSingleton<DummyInstructor>();
 
 // Add services to the container.
 

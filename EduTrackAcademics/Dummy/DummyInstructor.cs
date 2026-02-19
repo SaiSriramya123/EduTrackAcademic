@@ -2,7 +2,7 @@
 {
     public class DummyInstructor
     {
-        public static List<String> ApprovedInstructorEmails=new ()
+        public  List<String> ApprovedInstructorEmails=new ()
         {
             "sai@gmail.com",
             "sri@gmail.com",
