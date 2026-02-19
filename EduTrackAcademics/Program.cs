@@ -4,7 +4,7 @@ using EduTrackAcademics.Repository;
 using EduTrackAcademics.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using EduTrackAcademics.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<EduTrackAcademicsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EduTrackAcademicsContext") ?? throw new InvalidOperationException("Connection string 'EduTrackAcademicsContext' not found.")));

@@ -13,5 +13,11 @@ namespace EduTrackAcademics.Services
         {
             return _repo.GetInstructorData();
         }
-    }
+		public string AddInstructorDetails(string InsName)
+        {
+            return _repo.AddInstructorData(InsName);
+        }
+
+
+	}
 }

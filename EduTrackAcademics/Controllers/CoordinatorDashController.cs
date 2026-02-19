@@ -17,12 +17,18 @@ namespace EduTrackAcademics.Controllers
 			_coordinatorService = coordinatorService;
 		}
 
-		[HttpGet]
+		[HttpGet ("GetInstuctorDetails")]
 		public ActionResult<List<string>> GetInstructorDetails()
 		{
 			var result = _coordinatorService.GetInstructorDetails();
 			return Ok(result);
 		}
-		
+		[HttpPost("AddInstuctorDetails")]
+		public  ActionResult <string>  AddInstructorDetails(string name)
+		{
+			return Ok( _coordinatorService.AddInstructorDetails(name));
+			
+		}
+
 	}
 }

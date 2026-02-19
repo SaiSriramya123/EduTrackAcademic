@@ -20,6 +20,17 @@ namespace EduTrackAcademics.Repository
 
 
 		}
+		public string AddInstructorData(string n)
+		{
+			
+				string str = n;
+				_dm.ApprovedInstructorEmails.Add(str);
+			return str;
+			
+			
 
-    }
+
+		}
+
+	}
 }
