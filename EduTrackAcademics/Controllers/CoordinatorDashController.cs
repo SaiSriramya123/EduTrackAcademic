@@ -143,90 +143,200 @@ namespace EduTrackAcademics.Controllers
 		// 7️⃣ AUTO ASSIGN STUDENTS → BATCHES
 		// ===============================
 		[HttpPost("auto-assign-batches")]
-		public IActionResult AutoAssignStudentsToBatches([FromBody] AutoAssignBatchDTO dto)
+		public IActionResult AutoAssignBatches([FromBody] AutoAssignBatchDTO dto)
 		{
 			var students = _context.Student
 				.Where(s =>
 					s.StudentQualification == dto.Qualification &&
 					s.StudentProgram == dto.Program)
+				.OrderBy(s => s.StudentId)
 				.ToList();
 
 			if (!students.Any())
 				return BadRequest("No students found");
 
-			int assignedCount = 0;
+			int batchSize = dto.BatchSize;
+			int batchCounter = _context.CourseBatches.Count() + 1;
+			int assigned = 0;
 
-			while (students.Any())
+			for (int i = 0; i < students.Count; i += batchSize)
 			{
-				var batch = _context.CourseBatches
-					.FirstOrDefault(b =>
-						b.CourseId == dto.CourseId &&
-						b.IsActive &&
-						b.CurrentStudents < b.MaxStudents);
+				var batchId = $"B{batchCounter:D3}";
 
-				if (batch == null)
+				var batch = new CourseBatch
 				{
-					batch = new CourseBatch
-					{
-						BatchId = $"C{(_context.Coordinator.Count() + 1):D3}",
-						CourseId = dto.CourseId,
-						InstructorId = dto.InstructorId,
-						MaxStudents = 20,
-						CurrentStudents = 0,
-						IsActive = true
-					};
+					BatchId = batchId,
+					CourseId = dto.CourseId,
+					InstructorId = dto.InstructorId,
+					MaxStudents = batchSize,
+					CurrentStudents = 0,
+					IsActive = true
+				};
 
-					_context.CourseBatches.Add(batch);
-					_context.SaveChanges();
-				}
+				_context.CourseBatches.Add(batch);
+				_context.SaveChanges();
 
-				int seats = batch.MaxStudents - batch.CurrentStudents;
-				var group = students.Take(seats).ToList();
+				var group = students.Skip(i).Take(batchSize).ToList();
 
 				foreach (var student in group)
 				{
 					_context.StudentBatchAssignments.Add(new StudentBatchAssignment
 					{
-						BatchId = batch.BatchId,
+						BatchId = batchId,
 						StudentId = student.StudentId
 					});
 
-					students.Remove(student);
 					batch.CurrentStudents++;
-					assignedCount++;
+					assigned++;
 				}
 
-				if (batch.CurrentStudents >= batch.MaxStudents)
-					batch.IsActive = false;
-
+				batch.IsActive = batch.CurrentStudents < batch.MaxStudents;
 				_context.SaveChanges();
+
+				batchCounter++;
 			}
 
 			return Ok(new
 			{
-				Message = "Students assigned batch-wise successfully",
-				TotalAssigned = assignedCount
+				Message = "Batch assignment completed",
+				TotalAssignedStudents = assigned
 			});
 		}
 
-		// ===============================
-		// 8️⃣ INSTRUCTOR → VIEW THEIR BATCHES
-		// ===============================
+		// =====================================================
+		// 8️⃣ INSTRUCTOR → VIEW BATCHES
+		// =====================================================
 		[HttpGet("instructor/{instructorId}/batches")]
 		public IActionResult GetInstructorBatches(string instructorId)
 		{
-			var batches = _context.CourseBatches
+			return Ok(_context.CourseBatches
 				.Where(b => b.InstructorId == instructorId)
 				.Select(b => new
 				{
 					b.BatchId,
-					b.CourseId,
-					StudentCount = _context.StudentBatchAssignments
-						.Count(s => s.BatchId == b.BatchId)
+					b.Course.CourseName,
+					b.MaxStudents,
+					b.CurrentStudents,
+					b.IsActive
 				})
+				.ToList());
+		}
+
+		// =====================================================
+		// 9️⃣ INSTRUCTOR → VIEW STUDENTS IN A BATCH
+		// =====================================================
+		[HttpGet("batch/{batchId}/students")]
+		public IActionResult GetStudentsInBatch(string batchId)
+		{
+			return Ok(_context.StudentBatchAssignments
+				.Where(s => s.BatchId == batchId)
+				.Select(s => new
+				{
+					s.Student.StudentId,
+					s.Student.StudentName,
+					s.Student.StudentEmail
+				})
+				.ToList());
+		}
+		[HttpPost("assign-single-batch")]
+		public IActionResult AssignSingleBatch([FromBody] AutoAssignBatchDTO dto)
+		{
+			// 1️⃣ Get unassigned students
+			var students = _context.Student
+				.Where(s =>
+					s.StudentQualification == dto.Qualification &&
+					s.StudentProgram == dto.Program &&
+					!_context.StudentBatchAssignments.Any(a =>
+						a.StudentId == s.StudentId &&
+						a.Batch.CourseId == dto.CourseId))
 				.ToList();
 
-			return Ok(batches);
+			if (!students.Any())
+				return BadRequest("No students left to assign");
+
+			// 2️⃣ Create Batch
+			int batchCount = _context.CourseBatches.Count() + 1;
+			string batchId = $"B{batchCount:D3}";
+
+			var batch = new CourseBatch
+			{
+				BatchId = batchId,
+				CourseId = dto.CourseId,
+				InstructorId = dto.InstructorId,
+				MaxStudents = dto.BatchSize,
+				CurrentStudents = 0,
+				IsActive = true
+			};
+
+			_context.CourseBatches.Add(batch);
+			_context.SaveChanges();
+
+			// 3️⃣ Assign students (ONLY batchSize)
+			var batchStudents = students.Take(dto.BatchSize).ToList();
+
+			foreach (var student in batchStudents)
+			{
+				_context.StudentBatchAssignments.Add(new StudentBatchAssignment
+				{
+					BatchId = batchId,
+					StudentId = student.StudentId
+				});
+
+				batch.CurrentStudents++;
+			}
+
+			_context.SaveChanges();
+
+			int remaining = students.Count - batchStudents.Count;
+
+			// 4️⃣ Response (IMPORTANT)
+			return Ok(new
+			{
+				Message = "Batch assigned successfully",
+				BatchId = batchId,
+				AssignedStudents = batchStudents.Count,
+				RemainingStudents = remaining,
+				NextStep = remaining > 0
+					? "Assign next batch to same or another instructor"
+					: "All students assigned"
+			});
 		}
+
+		// =====================================================
+		// 🔟 INSTRUCTOR FULL DASHBOARD
+		// =====================================================
+		[HttpGet("instructor/{instructorId}/dashboard")]
+		public IActionResult InstructorDashboard(string instructorId)
+		{
+			var data = _context.CourseBatches
+				.Where(b => b.InstructorId == instructorId)
+				.Select(b => new
+				{
+					b.BatchId,
+					Course = new
+					{
+						b.Course.CourseId,
+						b.Course.CourseName
+					},
+					Students = _context.StudentBatchAssignments
+						.Where(s => s.BatchId == b.BatchId)
+						.Select(s => new
+						{
+							s.Student.StudentId,
+							s.Student.StudentName
+						}).ToList()
+				}).ToList();
+
+			return Ok(data);
+		}
+
 	}
 }
+
+
+
+
+
+
+
+

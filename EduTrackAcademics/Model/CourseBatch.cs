@@ -9,9 +9,11 @@ namespace EduTrackAcademics.Model
 
 		[Required]
 		public string CourseId { get; set; }
+		public Course Course { get; set; }
 
 		[Required]
 		public string InstructorId { get; set; }
+		public Instructor Instructor { get; set; }	
 
 		public int MaxStudents { get; set; } = 20;
 		public int CurrentStudents { get; set; } = 0;
