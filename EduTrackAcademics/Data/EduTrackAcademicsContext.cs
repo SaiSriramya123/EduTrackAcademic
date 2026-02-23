@@ -15,5 +15,33 @@ namespace EduTrackAcademics.Data
         }
 
         public DbSet<EduTrackAcademics.Model.Course> Course { get; set; } = default!;
-    }
+        public DbSet<EduTrackAcademics.Model.Student> Student { get; set; }
+        public DbSet<EduTrackAcademics.Model.Instructor> Instructor { get; set; }
+		public DbSet<EduTrackAcademics.Model.Coordinator> Coordinator{ get; set; }
+		public DbSet<EduTrackAcademics.Model.Qualification>Qualification { get; set; }
+		public DbSet<EduTrackAcademics.Model.AcademicYear> AcademicYear { get; set; }
+		public DbSet<EduTrackAcademics.Model.CourseAssignment>CourseAssignment{ get; set; }
+		public DbSet<EduTrackAcademics.Model.ProgramEntity> Programs { get; set; }
+		public DbSet<StudentCourseAssignment> StudentCourseAssignments { get; set; }
+		public DbSet<InstructorCourseAssignment> InstructorCourseAssignments { get; set; }
+		public DbSet<CourseBatch> CourseBatches { get; set; }
+		public DbSet<StudentBatchAssignment> StudentBatchAssignments { get; set; }
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<Qualification>()
+				.HasMany(q => q.Programs)
+				.WithOne(p => p.Qualification)
+				.HasForeignKey(p => p.QualificationId);
+
+			modelBuilder.Entity<ProgramEntity>()
+				.HasMany(p => p.AcademicYears)
+				.WithOne(y => y.Program)
+				.HasForeignKey(y => y.ProgramId);
+
+			modelBuilder.Entity<AcademicYear>()
+				.HasMany(y => y.Courses)
+				.WithOne(c => c.AcademicYear)
+				.HasForeignKey(c => c.AcademicYearId);
+		}
+	}
 }

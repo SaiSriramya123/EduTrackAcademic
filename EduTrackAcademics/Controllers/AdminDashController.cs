@@ -1,102 +1,75 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.DTO;
 using EduTrackAcademics.Model;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using EduTrackAcademics.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EduTrackAcademics.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProgramsController : ControllerBase
-    {
-        private readonly DbContext _context;
+	[ApiController]
+	[Route("api/admin")]
+	public class AdminDashboardController : ControllerBase
+	{
+		private readonly EduTrackAcademicsContext _context;
+		private readonly IdService _idService;
 
-        public ProgramsController(DbContext context)
-        {
-            _context = context;
-        }
+		public AdminDashboardController(EduTrackAcademicsContext context, IdService idService)
+		{
+			_context = context;
+			_idService = idService;
+		}
 
-        // GET: api/Programs
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Programs>>> GetPrograms()
-        {
-            return await _context.Set<Programs>().ToListAsync();
-        }
+		[HttpPost("qualification")]
+		public IActionResult AddQualification([FromBody] QualificationDTO dto)
+		{
+			var qualification = new Qualification
+			{
+				QualificationId = _idService.GenerateQualificationId(),
+				QualificationName = dto.QualificationName
+			};
 
-        // GET: api/Programs/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Programs>> GetProgram(string id)
-        {
-            var program = await _context.Set<Programs>().FindAsync(id);
+			_context.Qualification.Add(qualification);
+			_context.SaveChanges();
+			return Ok(new { Message = "Qualification added", id = qualification.QualificationId });
+		}
 
-            if (program == null)
-            {
-                return NotFound();
-            }
+		[HttpPost("program")]
+		public IActionResult AddProgram([FromBody] ProgramDTO dto)
+		{
+			// Check if qualification exists
+			var qualification = _context.Qualification.FirstOrDefault(q => q.QualificationId == dto.QualificationId);
+			if (qualification == null) return BadRequest("Qualification does not exist.");
 
-            return program;
-        }
+			var program = new ProgramEntity
+			{
+				ProgramId = _idService.GenerateProgramId(),
+				ProgramName = dto.ProgramName,
+				QualificationId = dto.QualificationId
+			};
 
-        // POST: api/Programs
-        [HttpPost]
-        public async Task<ActionResult<Programs>> CreateProgram(Programs program)
-        {
-            _context.Set<Programs>().Add(program);
-            await _context.SaveChangesAsync();
+			_context.Programs.Add(program);
+			_context.SaveChanges();
+			return Ok(new { Message = "Program added", id = program.ProgramId });
+		}
 
-            return CreatedAtAction(nameof(GetProgram), new { id = program.ProgramId }, program);
-        }
+		[HttpPost("academic-year")]
+		public IActionResult AddAcademicYear([FromBody] AcademicYearDTO dto)
+		{
+			// Check if program exists
+			var program = _context.Programs.FirstOrDefault(p => p.ProgramId == dto.ProgramId);
+			if (program == null) return BadRequest("Program does not exist.");
 
-        // PUT: api/Programs/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProgram(string id, Programs program)
-        {
-            if (id != program.ProgramId)
-            {
-                return BadRequest();
-            }
+			var year = new AcademicYear
+			{
+				AcademicYearId = _idService.GenerateAcademicYearId(),
+				YearNumber = dto.YearNumber,
+				ProgramId = dto.ProgramId
+			};
 
-            _context.Entry(program).State = EntityState.Modified;
+			_context.AcademicYear.Add(year);
+			_context.SaveChanges();
+			return Ok(new { Message = "Academic year added", id = year.AcademicYearId });
+		}
+	}
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProgramExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/Programs/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProgram(string id)
-        {
-            var program = await _context.Set<Programs>().FindAsync(id);
-            if (program == null)
-            {
-                return NotFound();
-            }
-
-            _context.Set<Programs>().Remove(program);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ProgramExists(string id)
-        {
-            return _context.Set<Programs>().Any(e => e.ProgramId == id);
-        }
-    }
 }

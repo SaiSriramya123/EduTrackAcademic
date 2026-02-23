@@ -3,38 +3,69 @@ using EduTrackAcademics.Dummy;
 using EduTrackAcademics.Repository;
 using EduTrackAcademics.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// =======================
+// Database
+// =======================
 builder.Services.AddDbContext<EduTrackAcademicsContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("EduTrackAcademicsContext") ?? throw new InvalidOperationException("Connection string 'EduTrackAcademicsContext' not found.")));
+	options.UseSqlServer(
+		builder.Configuration.GetConnectionString("EduTrackAcademicsContext")
+		?? throw new InvalidOperationException("Connection string not found")
+	));
+
+// =======================
+// Controllers & Swagger
+// =======================
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<ICoordinatorService, CoordinatorService>(); builder.Services.AddScoped<ICoordinatorrepo, Coordinatorrepo>(); builder.Services.AddSingleton<DummyInstructor>();
 
-// Add services to the container.
+// =======================
+// Dependency Injection
+// =======================
+builder.Services.AddScoped<ICoordinatorService, CoordinatorService>();
+builder.Services.AddScoped<ICoordinatorrepo, Coordinatorrepo>();
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddSingleton<DummyInstructor>();
+builder.Services.AddSingleton<DummyStudent>();
+builder.Services.AddSingleton<DummyInstructorReg>();
+
+builder.Services.AddScoped<IRegistrationRepo, RegistrationRepo>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+
+builder.Services.AddScoped<IdService>();
+builder.Services.AddScoped<PasswordService>();
+builder.Services.AddScoped<EmailService>();
+
+// =======================
+// CORS
+// =======================
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowAll", policy =>
+		policy.AllowAnyOrigin()
+			  .AllowAnyMethod()
+			  .AllowAnyHeader());
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// =======================
+// Middleware
+// =======================
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-	app.UseSwaggerUI(options => {
-		options.SwaggerEndpoint("/openapi/v1.json", "Education API v1");
-		options.RoutePrefix = "swagger";
-	});
-}
+	c.SwaggerEndpoint("/swagger/v1/swagger.json", "EduTrack API v1");
+	c.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.UseAuthorization();
-
+app.UseCors("AllowAll");
 app.MapControllers();
 
 app.Run();

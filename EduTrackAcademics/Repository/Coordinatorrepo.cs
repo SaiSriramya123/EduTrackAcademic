@@ -6,6 +6,7 @@ namespace EduTrackAcademics.Repository
     public class Coordinatorrepo:ICoordinatorrepo
     {
 		private readonly DummyInstructor _dm;
+
 		public Coordinatorrepo(DummyInstructor dm)
 		{
 			_dm = dm;
@@ -15,6 +16,7 @@ namespace EduTrackAcademics.Repository
 			if (_dm.ApprovedInstructorEmails != null)
 			{
 				return _dm.ApprovedInstructorEmails.ToList();
+
 			}
 			return new List<string>();
 

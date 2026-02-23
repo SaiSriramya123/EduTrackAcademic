@@ -26,7 +26,7 @@ namespace EduTrackAcademics.Controllers
         public async Task<ActionResult<IEnumerable<Course>>> GetCourse()
         {
             return await _context.Course.ToListAsync();
-          
+
         }
 
         // GET: api/Courses/5
