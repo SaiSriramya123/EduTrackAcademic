@@ -32,7 +32,7 @@ namespace EduTrackAcademics.Repository
 		public List<Instructor> InstructorRegistration(Instructor ins)
 		{
 			if (_context.Instructor.Any(x => x.InstructorEmail == ins.InstructorEmail))
-				throw new Exception("Instructor already exists");
+				throw new InvalidOperationException("Instructor already exists");
 
 			ins.InstructorId = _idService.GenerateInstructorId();
 

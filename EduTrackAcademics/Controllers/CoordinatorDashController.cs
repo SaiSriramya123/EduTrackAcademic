@@ -168,7 +168,7 @@ namespace EduTrackAcademics.Controllers
 				{
 					batch = new CourseBatch
 					{
-						BatchId = $"BATCH-{Guid.NewGuid().ToString()[..6]}",
+						BatchId = $"C{(_context.Coordinator.Count() + 1):D3}",
 						CourseId = dto.CourseId,
 						InstructorId = dto.InstructorId,
 						MaxStudents = 20,
