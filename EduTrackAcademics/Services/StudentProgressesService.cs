@@ -20,7 +20,7 @@ namespace EduTrackAcademics.Services
 				throw new ProgressRecordAlreadyExistsException("Already completed");
 
 			int count = await _repo.GetProgressCountAsync();
-			string newId = $"sp_{(count + 1):D3}";
+			string newId = $"SP{(count + 1):D3}";
 
 			var progress = new StudentProgress
 			{

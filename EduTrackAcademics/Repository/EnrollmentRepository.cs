@@ -3,6 +3,7 @@ using EduTrackAcademics.Data;
 using EduTrackAcademics.Model;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Repository
 {
@@ -16,7 +17,7 @@ namespace EduTrackAcademics.Repository
 		}
 		public async Task<int> GetEnrollmentCountAsync()
 		{
-			return await Task.FromResult<int>(_context.Enrollment.Count());
+			return await _context.Enrollment.CountAsync();
 		}
 
 		public async Task<bool> CheckIdExistsAsync(string enrollmentId)

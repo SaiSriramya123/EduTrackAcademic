@@ -20,7 +20,7 @@ namespace EduTrackAcademics.Services
 		public async Task<int> AddEnrollmentAsync(EnrollmentDto dto)
 		{
 			int count = await _repo.GetEnrollmentCountAsync();
-			string enrollmentId = $"en_{(count + 1):D3}";
+			string enrollmentId = $"E{(count + 1):D3}";
 
 			if (await _repo.CheckIdExistsAsync(enrollmentId))
 				throw new EnrollmentAlreadyExistsException($"Enrollment already exists");
