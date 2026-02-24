@@ -28,6 +28,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICoordinatorService, CoordinatorService>();
 builder.Services.AddScoped<ICoordinatorrepo, Coordinatorrepo>();
 
+builder.Services.AddScoped<IInstructorService, InstructorService>();
+builder.Services.AddScoped<IInstructorRepo, InstructorRepo>();
+builder.Services.AddSingleton<DummyInstructorData>();
+
 builder.Services.AddSingleton<DummyInstructor>();
 builder.Services.AddSingleton<DummyStudent>();
 builder.Services.AddSingleton<DummyInstructorReg>();
