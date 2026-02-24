@@ -102,23 +102,23 @@ namespace EduTrackAcademics.Controllers
 		// ===============================
 		// 5️⃣ GET STUDENTS BY QUALIFICATION + PROGRAM
 		// ===============================
+		// =====================================================
 		[HttpGet("students")]
-		public IActionResult GetStudents(string qualification, string program)
+		public IActionResult GetStudents(string qualification, string program, int year)
 		{
-			var students = _context.Student
+			return Ok(_context.Student
 				.Where(s =>
 					s.StudentQualification == qualification &&
-					s.StudentProgram == program)
+					s.StudentProgram == program &&
+					s.Year == year)
 				.Select(s => new
 				{
 					s.StudentId,
 					s.StudentName,
 					s.StudentEmail
-				})
-				.ToList();
-
-			return Ok(students);
+				}).ToList());
 		}
+
 
 		// ===============================
 		// 6️⃣ GET INSTRUCTORS BY SKILL
@@ -138,37 +138,61 @@ namespace EduTrackAcademics.Controllers
 
 			return Ok(instructors);
 		}
+		[HttpGet("batches")]
+		public IActionResult GetBatches(string program, int year)
+		{
+			return Ok(_context.CourseBatches
+				.Include(b => b.Course)
+				.Where(b =>
+					_context.AcademicYear.Any(y =>
+						y.AcademicYearId == b.Course.AcademicYearId &&
+						y.YearNumber == year &&
+						y.Program.ProgramName == program))
+				.Select(b => new
+				{
+					b.BatchId,
+					b.Course.CourseName,
+					b.InstructorId,
+					b.CurrentStudents,
+					b.MaxStudents,
+					b.IsActive
+				}).ToList());
+		}
+
 
 		// ===============================
 		// 7️⃣ AUTO ASSIGN STUDENTS → BATCHES
 		// ===============================
-		[HttpPost("auto-assign-batches")]
-		public IActionResult AutoAssignBatches([FromBody] AutoAssignBatchDTO dto)
+		[HttpPost("assign-batches")]
+		public IActionResult AssignBatches([FromBody] AutoAssignBatchDTO dto)
 		{
 			var students = _context.Student
 				.Where(s =>
 					s.StudentQualification == dto.Qualification &&
-					s.StudentProgram == dto.Program)
+					s.StudentProgram == dto.Program &&
+					s.Year == dto.Year &&
+					!_context.StudentBatchAssignments.Any(a =>
+						a.StudentId == s.StudentId &&
+						a.Batches.CourseId == dto.CourseId))
 				.OrderBy(s => s.StudentId)
 				.ToList();
 
 			if (!students.Any())
 				return BadRequest("No students found");
 
-			int batchSize = dto.BatchSize;
 			int batchCounter = _context.CourseBatches.Count() + 1;
 			int assigned = 0;
 
-			for (int i = 0; i < students.Count; i += batchSize)
+			for (int i = 0; i < students.Count; i += dto.BatchSize)
 			{
-				var batchId = $"B{batchCounter:D3}";
+				string batchId = $"B{batchCounter:D3}";
 
 				var batch = new CourseBatch
 				{
 					BatchId = batchId,
 					CourseId = dto.CourseId,
 					InstructorId = dto.InstructorId,
-					MaxStudents = batchSize,
+					MaxStudents = dto.BatchSize,
 					CurrentStudents = 0,
 					IsActive = true
 				};
@@ -176,7 +200,7 @@ namespace EduTrackAcademics.Controllers
 				_context.CourseBatches.Add(batch);
 				_context.SaveChanges();
 
-				var group = students.Skip(i).Take(batchSize).ToList();
+				var group = students.Skip(i).Take(dto.BatchSize).ToList();
 
 				foreach (var student in group)
 				{
@@ -199,7 +223,7 @@ namespace EduTrackAcademics.Controllers
 			return Ok(new
 			{
 				Message = "Batch assignment completed",
-				TotalAssignedStudents = assigned
+				AssignedStudents = assigned
 			});
 		}
 
@@ -221,6 +245,24 @@ namespace EduTrackAcademics.Controllers
 				})
 				.ToList());
 		}
+		[HttpGet("batch-count")]
+		public IActionResult GetBatchCount(string program, int year)
+		{
+			int count = _context.CourseBatches
+				.Include(b => b.Course)
+				.Count(b =>
+					_context.AcademicYear.Any(y =>
+						y.AcademicYearId == b.Course.AcademicYearId &&
+						y.YearNumber == year &&
+						y.Program.ProgramName == program));
+
+			return Ok(new
+			{
+				Program = program,
+				Year = year,
+				TotalBatches = count
+			});
+		}
 
 		// =====================================================
 		// 9️⃣ INSTRUCTOR → VIEW STUDENTS IN A BATCH
@@ -235,26 +277,27 @@ namespace EduTrackAcademics.Controllers
 					s.Student.StudentId,
 					s.Student.StudentName,
 					s.Student.StudentEmail
-				})
-				.ToList());
+				}).ToList());
 		}
 		[HttpPost("assign-single-batch")]
 		public IActionResult AssignSingleBatch([FromBody] AutoAssignBatchDTO dto)
 		{
-			// 1️⃣ Get unassigned students
+			// 1️⃣ Get ONLY unassigned students (YEAR SAFE)
 			var students = _context.Student
 				.Where(s =>
 					s.StudentQualification == dto.Qualification &&
 					s.StudentProgram == dto.Program &&
+					s.Year == dto.Year &&                                  // ✅ YEAR FILTER
 					!_context.StudentBatchAssignments.Any(a =>
 						a.StudentId == s.StudentId &&
 						a.Batches.CourseId == dto.CourseId))
+				.OrderBy(s => s.StudentId)
 				.ToList();
 
 			if (!students.Any())
 				return BadRequest("No students left to assign");
 
-			// 2️⃣ Create Batch
+			// 2️⃣ Create ONE new batch
 			int batchCount = _context.CourseBatches.Count() + 1;
 			string batchId = $"B{batchCount:D3}";
 
@@ -271,7 +314,7 @@ namespace EduTrackAcademics.Controllers
 			_context.CourseBatches.Add(batch);
 			_context.SaveChanges();
 
-			// 3️⃣ Assign students (ONLY batchSize)
+			// 3️⃣ Assign ONLY BatchSize students
 			var batchStudents = students.Take(dto.BatchSize).ToList();
 
 			foreach (var student in batchStudents)
@@ -285,14 +328,15 @@ namespace EduTrackAcademics.Controllers
 				batch.CurrentStudents++;
 			}
 
+			batch.IsActive = batch.CurrentStudents < batch.MaxStudents;
 			_context.SaveChanges();
 
 			int remaining = students.Count - batchStudents.Count;
 
-			// 4️⃣ Response (IMPORTANT)
+			// 4️⃣ Response for UI / Swagger
 			return Ok(new
 			{
-				Message = "Batch assigned successfully",
+				Message = "Single batch assigned successfully",
 				BatchId = batchId,
 				AssignedStudents = batchStudents.Count,
 				RemainingStudents = remaining,
