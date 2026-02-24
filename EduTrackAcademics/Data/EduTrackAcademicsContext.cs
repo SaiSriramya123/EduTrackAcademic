@@ -22,6 +22,11 @@ namespace EduTrackAcademics.Data
 		public DbSet<EduTrackAcademics.Model.AcademicYear> AcademicYear { get; set; }
 		public DbSet<EduTrackAcademics.Model.CourseAssignment>CourseAssignment{ get; set; }
 		public DbSet<EduTrackAcademics.Model.ProgramEntity> Programs { get; set; }
+		public DbSet<EduTrackAcademics.Model.Question> Questions { get; set; }
+		public DbSet<EduTrackAcademics.Model.Assessment> Assessments { get; set; }
+		public DbSet<EduTrackAcademics.Model.Attendance> Attendances { get; set; }
+		public DbSet<EduTrackAcademics.Model.Module>Modules { get; set; }
+		public DbSet<EduTrackAcademics.Model.Content> Contents { get; set; }
 		public DbSet<StudentCourseAssignment> StudentCourseAssignments { get; set; }
 		public DbSet<InstructorCourseAssignment> InstructorCourseAssignments { get; set; }
 		public DbSet<CourseBatch> CourseBatches { get; set; }
