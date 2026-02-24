@@ -20,6 +20,7 @@ namespace EduTrackAcademics.Model
 		public string StudentQualification { get; set; }
 		public string StudentProgram { get; set; }
 		public DateTime StudentAcademicYear { get; set; }
+		public int Year { get; set; }
 		public string StudentGender { get; set; }
 
 		[Required]

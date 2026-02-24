@@ -48,5 +48,8 @@ namespace EduTrackAcademics.Data
 				.WithOne(c => c.AcademicYear)
 				.HasForeignKey(c => c.AcademicYearId);
 		}
+        public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;
+
+		public DbSet<EduTrackAcademics.Model.StudentProgress> StudentProgress { get; set; } = default!;
 	}
 }

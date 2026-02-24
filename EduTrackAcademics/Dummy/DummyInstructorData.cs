@@ -1,10 +1,12 @@
 ﻿using EduTrackAcademics.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Dummy
 {
 	public class DummyInstructorData
 	{
-	
+
 		public static List<CourseBatch> GetBatches()
 		{
 			return new List<CourseBatch>
@@ -152,3 +154,21 @@ namespace EduTrackAcademics.Dummy
 		public static List<Attendance> Attendances = new List<Attendance>();
 	}
 }
+	
+	//	[HttpGet("instructors")]
+	//	public IActionResult GetInstructors(string skill)
+	//	{
+	//		var instructors = _context.Instructor
+	//			.Where(i => i.InstructorSkills.Contains(skill))
+	//			.Select(i => new
+	//			{
+	//				i.InstructorId,
+	//				i.InstructorName,
+	//				i.InstructorSkills
+	//			})
+	//			.ToList();
+
+	//		return Ok(instructors);
+	//	}
+	//}
+
