@@ -4,9 +4,7 @@ namespace EduTrackAcademics.Dummy
 {
 	public class DummyInstructorData
 	{
-		// =========================
-		// BATCHES
-		// =========================
+	
 		public static List<CourseBatch> GetBatches()
 		{
 			return new List<CourseBatch>
