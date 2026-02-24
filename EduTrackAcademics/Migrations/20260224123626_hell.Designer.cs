@@ -4,6 +4,7 @@ using EduTrackAcademics.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduTrackAcademics.Migrations
 {
     [DbContext(typeof(EduTrackAcademicsContext))]
-    partial class EduTrackAcademicsContextModelSnapshot : ModelSnapshot
+    [Migration("20260224123626_hell")]
+    partial class hell
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -545,9 +548,6 @@ namespace EduTrackAcademics.Migrations
                     b.Property<string>("StudentQualification")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
 
                     b.HasKey("StudentId");
 
