@@ -1,146 +1,144 @@
 ﻿using EduTrackAcademics.Data;
-using EduTrackAcademics.Dummy;
 using EduTrackAcademics.Model;
-using Microsoft.AspNetCore.Http;
+using EduTrackAcademics.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Controllers
 {
-	[Route("api/[controller]")]
 	[ApiController]
+	[Route("api/instructor")]
 	public class InstructorDashboardController : ControllerBase
 	{
-		private readonly EduTrackAcademicsContext _context;
+		private readonly IInstructorService _service;
 
-		public InstructorDashboardController(EduTrackAcademicsContext context)
+		public InstructorDashboardController(IInstructorService service)
 		{
-			_context = context;
+			_service = service;
 		}
 
-		// ===============================
-		// VIEW ASSIGNED BATCHES
-		// ===============================
 		[HttpGet("{instructorId}/batches")]
-		public IActionResult GetBatches(string instructorId)
-		{
-			var batches = DummyInstructorData.GetBatches()
-				.Where(b => b.InstructorId == instructorId)
-				.ToList();
+		public async Task<IActionResult> GetBatches(string instructorId)
+		=> Ok(await _service.GetBatches(instructorId));
 
-			return Ok(batches);
-		}
-
-		// ===============================
-		// VIEW STUDENTS IN A BATCH
-		// ===============================
 		[HttpGet("batch/{batchId}/students")]
-		public IActionResult GetStudents(string batchId)
-		{
-			var students = DummyInstructorData.GetStudents()
-				.Where(s => s.BatchId == batchId)
-				.Select(s => new
-				{
-					s.Student.StudentId,
-					s.Student.StudentName,
-					s.Student.StudentEmail
-				}).ToList();
+		public async Task<IActionResult> GetStudents(string batchId)
+			=> Ok(await _service.GetStudents(batchId));
 
-			return Ok(students);
+		[HttpGet("{instructorId}/dashboard")]
+		public async Task<IActionResult> Dashboard(string instructorId)
+			=> Ok(await _service.GetDashboard(instructorId));
+
+		[HttpPost("module/add")] 
+		public async Task<IActionResult> AddModule(Module m) { 
+			await _service.AddModule(m); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// VIEW MODULES FOR A COURSE
-		// ===============================
-		[HttpGet("course/{courseId}/modules")]
-		public IActionResult GetModules(string courseId)
-		{
-			var modules = DummyInstructorData.GetModules()
-				.Where(m => m.CourseID == courseId)
-				.ToList();
-
-			return Ok(modules);
+		[HttpPut("module/update")] 
+		public async Task<IActionResult> UpdateModule(Module m) { 
+			await _service.UpdateModule(m); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// VIEW CONTENT INSIDE MODULE
-		// ===============================
-		[HttpGet("module/{moduleId}/content")]
-		public IActionResult GetContent(string moduleId)
-		{
-			var content = DummyInstructorData.GetContents()
-				.Where(c => c.ModuleID == moduleId)
-				.ToList();
-
-			return Ok(content);
+		[HttpDelete("module/{id}")] 
+		public async Task<IActionResult> DeleteModule(string id) { 
+			await _service.DeleteModule(id); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// VIEW ASSESSMENTS FOR COURSE
-		// ===============================
-		[HttpGet("course/{courseId}/assessments")]
-		public IActionResult GetAssessments(string courseId)
-		{
-			var assessments = DummyInstructorData.GetAssessments()
-				.Where(a => a.CourseID == courseId)
-				.ToList();
+		[HttpGet("course/{courseId}/modules")] 
+		public async Task<IActionResult> GetModules(string courseId) 
+			=> Ok(await _service.GetModules(courseId));
 
-			return Ok(assessments);
+		[HttpPut("module/{id}/complete")] 
+		public async Task<IActionResult> Complete(string id) 
+			=> Ok(await _service.CompleteModule(id));
+
+		[HttpPost("content/add")] 
+		public async Task<IActionResult> AddContent(Content c) { 
+			await _service.AddContent(c); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// VIEW QUESTIONS OF ASSESSMENT
-		// ===============================
-		[HttpGet("assessment/{assessmentId}/questions")]
-		public IActionResult GetQuestions(string assessmentId)
-		{
-			var assessment = DummyInstructorData.GetAssessments()
-				.FirstOrDefault(a => a.AssessmentID == assessmentId);
-			if (assessment == null)
-				return NotFound("Assessment Not Found");
-
-			return Ok(assessment.Questions);
+		[HttpPut("content/update")] 
+		public async Task<IActionResult> UpdateContent(Content c) { 
+			await _service.UpdateContent(c); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// EVALUATE STUDENT ASSESSMENT
-		// ===============================
-		[HttpPut("assessment/evaluate")]
-		public IActionResult Evaluate(string assessmentId, int marks, string feedback)
-		{
-			var assessment = DummyInstructorData.GetAssessments()
-				.FirstOrDefault(a => a.AssessmentID == assessmentId);
-
-			if (assessment == null)
-				return NotFound();
-
-			assessment.MarksObtained = marks;
-			assessment.Feedback = feedback;
-
-			return Ok("Evaluation saved");
+		[HttpDelete("content/{id}")] 
+		public async Task<IActionResult> DeleteContent(string id) { 
+			await _service.DeleteContent(id); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// MARK ATTENDANCE
-		// ===============================
-		[HttpPost("attendance/mark")]
-		public IActionResult MarkAttendance([FromBody] Attendance attendance)
-		{
-			DummyInstructorData.Attendances.Add(attendance);
-			return Ok("Attendance marked");
+		[HttpGet("module/{id}/content")] 
+		public async Task<IActionResult> GetContent(string id) 
+			=> Ok(await _service.GetContent(id));
+
+		[HttpPost("assessment/add")] 
+		public async Task<IActionResult> AddAssessment(Assessment a) { 
+			await _service.AddAssessment(a); 
+			return Ok(); 
 		}
 
-		// ===============================
-		// VIEW ATTENDANCE BY BATCH
-		// ===============================
-		[HttpGet("attendance/{batchId}")]
-		public IActionResult GetAttendance(string batchId)
-		{
-			var records = DummyInstructorData.Attendances
-				.Where(a => a.BatchId == batchId)
-				.ToList();
-
-			return Ok(records);
+		[HttpPut("assessment/update")] 
+		public async Task<IActionResult> UpdateAssessment(Assessment a) { 
+			await _service.UpdateAssessment(a); 
+			return Ok(); 
 		}
+
+		[HttpDelete("assessment/{id}")] 
+		public async Task<IActionResult> DeleteAssessment(string id) { 
+			await _service.DeleteAssessment(id); 
+			return Ok(); 
+		}
+
+		[HttpGet("course/{courseId}/assessments")] 
+		public async Task<IActionResult> GetAssessments(string courseId) 
+			=> Ok(await _service.GetAssessments(courseId));
+
+		[HttpGet("assessment/{id}/questions")] 
+		public async Task<IActionResult> GetQuestions(string id) 
+			=> Ok(await _service.GetQuestions(id));
+
+		[HttpPut("assessment/evaluate")] 
+		public async Task<IActionResult> Evaluate(string id, int marks, string feedback) { 
+			await _service.EvaluateAssessment(id, marks, feedback); 
+			return Ok(); 
+		}
+
+		[HttpPost("attendance/mark")] 
+		public async Task<IActionResult> Mark(Attendance a) { 
+			await _service.MarkAttendance(a); 
+			return Ok(); 
+		}
+
+		[HttpPut("attendance/{id}")] 
+		public async Task<IActionResult> UpdateAtt(string id, Attendance a) { 
+			await _service.UpdateAttendance(id, a); 
+			return Ok(); 
+		}
+
+		[HttpDelete("attendance/{id}")] 
+		public async Task<IActionResult> DeleteAtt(string id, string reason) { 
+			await _service.DeleteAttendance(id, reason); 
+			return Ok(); 
+		}
+
+		[HttpGet("attendance/{batchId}")] 
+		public async Task<IActionResult> GetAtt(string batchId) 
+			=> Ok(await _service.GetAttendance(batchId));
+
+		[HttpGet("attendance/report/{batchId}")] 
+		public async Task<IActionResult> Report(string batchId) 
+			=> Ok(await _service.GetAttendanceReport(batchId));
+
+		[HttpGet("attendance/irregular/{batchId}")] 
+		public async Task<IActionResult> Irregular(string batchId) 
+			=> Ok(await _service.GetIrregularStudents(batchId));
 	}
+
 }
+
