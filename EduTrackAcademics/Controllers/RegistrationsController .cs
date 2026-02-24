@@ -33,7 +33,7 @@ namespace EduTrackAcademics.Controllers
 		}
 
 
-		// STUDENT REGISTRATION
+		
 		[HttpPost("StudentDetails")]
 		public IActionResult StudentRegister(StudentDTO dto)
 		{
