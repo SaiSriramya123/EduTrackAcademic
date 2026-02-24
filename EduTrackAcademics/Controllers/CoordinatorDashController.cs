@@ -248,7 +248,7 @@ namespace EduTrackAcademics.Controllers
 					s.StudentProgram == dto.Program &&
 					!_context.StudentBatchAssignments.Any(a =>
 						a.StudentId == s.StudentId &&
-						a.Batch.CourseId == dto.CourseId))
+						a.Batches.CourseId == dto.CourseId))
 				.ToList();
 
 			if (!students.Any())

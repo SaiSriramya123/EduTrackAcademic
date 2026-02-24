@@ -43,6 +43,12 @@ builder.Services.AddScoped<IdService>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<EmailService>();
 
+
+builder.Services.AddScoped<IPerformanceRepository, PerformanceRepository>();
+builder.Services.AddScoped<IPerformanceService, PerformanceService>();
+
+
+
 // =======================
 // CORS
 // =======================

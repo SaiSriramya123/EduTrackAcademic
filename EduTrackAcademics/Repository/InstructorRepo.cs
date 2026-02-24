@@ -78,7 +78,7 @@ namespace EduTrackAcademics.Repository
 		public List<Attendance> GetAttendance(string batchId)
 		{
 			return _context.Attendances
-				.Where(a => a.BatchID == batchId)
+				.Where(a => a.BatchId == batchId)
 				.ToList();
 		}
 	}

@@ -137,7 +137,7 @@ namespace EduTrackAcademics.Controllers
 		public IActionResult GetAttendance(string batchId)
 		{
 			var records = DummyInstructorData.Attendances
-				.Where(a => a.BatchID == batchId)
+				.Where(a => a.BatchId == batchId)
 				.ToList();
 
 			return Ok(records);

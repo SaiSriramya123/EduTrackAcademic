@@ -16,9 +16,11 @@ namespace EduTrackAcademics.Model
 		//public Enrollment Enrollment { get; set; }
 
 		[Required(ErrorMessage = "Batch ID is required")]
-		[ForeignKey("Batch")]
-		public string BatchID { get; set; }
-		public Batch Batch { get; set; }
+	
+		//public int StudentBatchAssignmentId { get; set; }
+		public string BatchId {  get; set; }
+		[ForeignKey(nameof(BatchId))]
+		public StudentBatchAssignment StudentBatchAssignment { get; set; }
 
 		[Required(ErrorMessage = "Session Date is required")]
 		[DataType(DataType.Date)]

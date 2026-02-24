@@ -1,0 +1,548 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace EduTrackAcademics.Migrations
+{
+    /// <inheritdoc />
+    public partial class initial : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "Coordinator",
+                columns: table => new
+                {
+                    CoordinatorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CoordinatorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoordinatorEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoordinatorPhone = table.Column<long>(type: "bigint", nullable: false),
+                    CoordinatorQualification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoordinatorExperience = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoordinatorGender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResumePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoordinatorPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Coordinator", x => x.CoordinatorId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Instructor",
+                columns: table => new
+                {
+                    InstructorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    InstructorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstructorEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstructorPhone = table.Column<long>(type: "bigint", nullable: false),
+                    InstructorQualification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstructorSkills = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstructorExperience = table.Column<int>(type: "int", nullable: false),
+                    InstructorJoinDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    InstructorGender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstructorPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResumePath = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Instructor", x => x.InstructorId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Qualification",
+                columns: table => new
+                {
+                    QualificationId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    QualificationName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Qualification", x => x.QualificationId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Student",
+                columns: table => new
+                {
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    StudentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentPhone = table.Column<long>(type: "bigint", nullable: false),
+                    StudentQualification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentProgram = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentAcademicYear = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StudentGender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentPassword = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Student", x => x.StudentId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Programs",
+                columns: table => new
+                {
+                    ProgramId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProgramName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QualificationId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Programs", x => x.ProgramId);
+                    table.ForeignKey(
+                        name: "FK_Programs_Qualification_QualificationId",
+                        column: x => x.QualificationId,
+                        principalTable: "Qualification",
+                        principalColumn: "QualificationId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AcademicYear",
+                columns: table => new
+                {
+                    AcademicYearId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    YearNumber = table.Column<int>(type: "int", nullable: false),
+                    ProgramId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AcademicYear", x => x.AcademicYearId);
+                    table.ForeignKey(
+                        name: "FK_AcademicYear_Programs_ProgramId",
+                        column: x => x.ProgramId,
+                        principalTable: "Programs",
+                        principalColumn: "ProgramId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Course",
+                columns: table => new
+                {
+                    CourseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Credits = table.Column<int>(type: "int", nullable: false),
+                    DurationInWeeks = table.Column<int>(type: "int", nullable: false),
+                    AcademicYearId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Course", x => x.CourseId);
+                    table.ForeignKey(
+                        name: "FK_Course_AcademicYear_AcademicYearId",
+                        column: x => x.AcademicYearId,
+                        principalTable: "AcademicYear",
+                        principalColumn: "AcademicYearId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Assessments",
+                columns: table => new
+                {
+                    AssessmentID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaxMarks = table.Column<int>(type: "int", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MarksObtained = table.Column<int>(type: "int", nullable: true),
+                    Feedback = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assessments", x => x.AssessmentID);
+                    table.ForeignKey(
+                        name: "FK_Assessments_Course_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "Course",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseAssignment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    InstructorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AssignedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseAssignment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseAssignment_Course_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Course",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseAssignment_Instructor_InstructorId",
+                        column: x => x.InstructorId,
+                        principalTable: "Instructor",
+                        principalColumn: "InstructorId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseBatches",
+                columns: table => new
+                {
+                    BatchId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    InstructorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    MaxStudents = table.Column<int>(type: "int", nullable: false),
+                    CurrentStudents = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseBatches", x => x.BatchId);
+                    table.ForeignKey(
+                        name: "FK_CourseBatches_Course_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Course",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseBatches_Instructor_InstructorId",
+                        column: x => x.InstructorId,
+                        principalTable: "Instructor",
+                        principalColumn: "InstructorId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InstructorCourseAssignments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InstructorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InstructorCourseAssignments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_InstructorCourseAssignments_Course_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Course",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InstructorCourseAssignments_Instructor_InstructorId",
+                        column: x => x.InstructorId,
+                        principalTable: "Instructor",
+                        principalColumn: "InstructorId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Modules",
+                columns: table => new
+                {
+                    ModuleID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SequenceOrder = table.Column<int>(type: "int", nullable: false),
+                    LearningObjectives = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Modules", x => x.ModuleID);
+                    table.ForeignKey(
+                        name: "FK_Modules_Course_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "Course",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentCourseAssignments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentCourseAssignments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentCourseAssignments_Course_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Course",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentCourseAssignments_Student_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Student",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    QuestionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AssessmentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    QuestionType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuestionText = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    OptionA = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionB = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionC = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptionD = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CorrectOption = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AnswerText = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Marks = table.Column<int>(type: "int", nullable: false),
+                    OrderNo = table.Column<int>(type: "int", nullable: false),
+                    createdDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.QuestionId);
+                    table.ForeignKey(
+                        name: "FK_Questions_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalTable: "Assessments",
+                        principalColumn: "AssessmentID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentBatchAssignments",
+                columns: table => new
+                {
+                    BatchId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BatchesBatchId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentBatchAssignments", x => x.BatchId);
+                    table.ForeignKey(
+                        name: "FK_StudentBatchAssignments_CourseBatches_BatchesBatchId",
+                        column: x => x.BatchesBatchId,
+                        principalTable: "CourseBatches",
+                        principalColumn: "BatchId");
+                    table.ForeignKey(
+                        name: "FK_StudentBatchAssignments_Student_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Student",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Contents",
+                columns: table => new
+                {
+                    ContentID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ModuleID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    ContentURI = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duration = table.Column<TimeSpan>(type: "time", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Contents", x => x.ContentID);
+                    table.ForeignKey(
+                        name: "FK_Contents_Modules_ModuleID",
+                        column: x => x.ModuleID,
+                        principalTable: "Modules",
+                        principalColumn: "ModuleID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attendances",
+                columns: table => new
+                {
+                    AttendanceID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EnrollmentID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BatchId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SessionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Mode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<bool>(type: "bit", nullable: false),
+                    UpdateReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletionDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attendances", x => x.AttendanceID);
+                    table.ForeignKey(
+                        name: "FK_Attendances_StudentBatchAssignments_BatchId",
+                        column: x => x.BatchId,
+                        principalTable: "StudentBatchAssignments",
+                        principalColumn: "BatchId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AcademicYear_ProgramId",
+                table: "AcademicYear",
+                column: "ProgramId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assessments_CourseID",
+                table: "Assessments",
+                column: "CourseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attendances_BatchId",
+                table: "Attendances",
+                column: "BatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contents_ModuleID",
+                table: "Contents",
+                column: "ModuleID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Course_AcademicYearId",
+                table: "Course",
+                column: "AcademicYearId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseAssignment_CourseId",
+                table: "CourseAssignment",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseAssignment_InstructorId",
+                table: "CourseAssignment",
+                column: "InstructorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseBatches_CourseId",
+                table: "CourseBatches",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseBatches_InstructorId",
+                table: "CourseBatches",
+                column: "InstructorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InstructorCourseAssignments_CourseId",
+                table: "InstructorCourseAssignments",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InstructorCourseAssignments_InstructorId",
+                table: "InstructorCourseAssignments",
+                column: "InstructorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Modules_CourseID",
+                table: "Modules",
+                column: "CourseID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Programs_QualificationId",
+                table: "Programs",
+                column: "QualificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_AssessmentId",
+                table: "Questions",
+                column: "AssessmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentBatchAssignments_BatchesBatchId",
+                table: "StudentBatchAssignments",
+                column: "BatchesBatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentBatchAssignments_StudentId",
+                table: "StudentBatchAssignments",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentCourseAssignments_CourseId",
+                table: "StudentCourseAssignments",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentCourseAssignments_StudentId",
+                table: "StudentCourseAssignments",
+                column: "StudentId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "Attendances");
+
+            migrationBuilder.DropTable(
+                name: "Contents");
+
+            migrationBuilder.DropTable(
+                name: "Coordinator");
+
+            migrationBuilder.DropTable(
+                name: "CourseAssignment");
+
+            migrationBuilder.DropTable(
+                name: "InstructorCourseAssignments");
+
+            migrationBuilder.DropTable(
+                name: "Questions");
+
+            migrationBuilder.DropTable(
+                name: "StudentCourseAssignments");
+
+            migrationBuilder.DropTable(
+                name: "StudentBatchAssignments");
+
+            migrationBuilder.DropTable(
+                name: "Modules");
+
+            migrationBuilder.DropTable(
+                name: "Assessments");
+
+            migrationBuilder.DropTable(
+                name: "CourseBatches");
+
+            migrationBuilder.DropTable(
+                name: "Student");
+
+            migrationBuilder.DropTable(
+                name: "Course");
+
+            migrationBuilder.DropTable(
+                name: "Instructor");
+
+            migrationBuilder.DropTable(
+                name: "AcademicYear");
+
+            migrationBuilder.DropTable(
+                name: "Programs");
+
+            migrationBuilder.DropTable(
+                name: "Qualification");
+        }
+    }
+}
