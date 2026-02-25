@@ -54,6 +54,10 @@ builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesReposi
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
 builder.Services.AddSingleton<DummyEnrollment>();
 
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+
+
 // =======================
 // CORS
 // =======================
