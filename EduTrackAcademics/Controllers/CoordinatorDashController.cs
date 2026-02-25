@@ -1,8 +1,6 @@
-﻿using EduTrackAcademics.Data;
-using EduTrackAcademics.DTO;
-using EduTrackAcademics.Model;
+﻿using EduTrackAcademics.DTO;
+using EduTrackAcademics.Service;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Controllers
 {
@@ -10,333 +8,89 @@ namespace EduTrackAcademics.Controllers
 	[Route("api/coordinator")]
 	public class CoordinatorDashboardController : ControllerBase
 	{
-		private readonly EduTrackAcademicsContext _context;
+		private readonly ICoordinatorDashboardService _service;
 
-		public CoordinatorDashboardController(EduTrackAcademicsContext context)
+		public CoordinatorDashboardController(ICoordinatorDashboardService service)
 		{
-			_context = context;
+			_service = service;
 		}
 
-		// ===============================
-		// 1️⃣ GET PROGRAMS
-		// ===============================
 		[HttpGet("programs")]
 		public IActionResult GetPrograms()
 		{
-			var programs = _context.Programs
-				.Select(p => new { p.ProgramId, p.ProgramName, p.QualificationId })
-				.ToList();
-
-			return Ok(programs);
+			return Ok(_service.GetPrograms());
 		}
 
-		// ===============================
-		// 2️⃣ GET ACADEMIC YEARS BY PROGRAM
-		// ===============================
 		[HttpGet("program/{programId}/years")]
 		public IActionResult GetAcademicYears(string programId)
 		{
-			var years = _context.AcademicYear
-				.Where(y => y.ProgramId == programId)
-				.Select(y => new
-				{
-					y.AcademicYearId,
-					y.YearNumber
-				})
-				.ToList();
-
-			return Ok(years);
+			return Ok(_service.GetAcademicYears(programId));
 		}
 
-		// ===============================
-		// 3️⃣ ADD COURSE
-		// ===============================
 		[HttpPost("course")]
 		public IActionResult AddCourse([FromBody] CourseDTO dto)
 		{
-			var year = _context.AcademicYear
-				.FirstOrDefault(y => y.AcademicYearId == dto.AcademicYearId);
-
-			if (year == null)
-				return BadRequest("Academic year not found");
-
-			var course = new Course
-			{
-				CourseId = $"C{_context.Course.Count() + 1:D3}",
-				CourseName = dto.CourseName,
-				Credits = dto.Credits,
-				DurationInWeeks = dto.DurationInWeeks,
-				AcademicYearId = dto.AcademicYearId
-			};
-
-			_context.Course.Add(course);
-			_context.SaveChanges();
-
-			return Ok(new
-			{
-				Message = "Course added successfully",
-				course.CourseId
-			});
+			return Ok(_service.AddCourse(dto));
 		}
 
-		// ===============================
-		// 4️⃣ GET COURSES BY ACADEMIC YEAR
-		// ===============================
 		[HttpGet("academic-year/{yearId}/courses")]
 		public IActionResult GetCourses(string yearId)
 		{
-			var courses = _context.Course
-				.Where(c => c.AcademicYearId == yearId)
-				.Select(c => new
-				{
-					c.CourseId,
-					c.CourseName,
-					c.Credits,
-					c.DurationInWeeks
-				})
-				.ToList();
-
-			return Ok(courses);
+			return Ok(_service.GetCourses(yearId));
 		}
 
-		// ===============================
-		// 5️⃣ GET STUDENTS BY QUALIFICATION + PROGRAM
-		// ===============================
 		[HttpGet("students")]
-		public IActionResult GetStudents(string qualification, string program)
+		public IActionResult GetStudents(string qualification, string program, int year)
 		{
-			var students = _context.Student
-				.Where(s =>
-					s.StudentQualification == qualification &&
-					s.StudentProgram == program)
-				.Select(s => new
-				{
-					s.StudentId,
-					s.StudentName,
-					s.StudentEmail
-				})
-				.ToList();
-
-			return Ok(students);
+			return Ok(_service.GetStudents(qualification, program, year));
 		}
 
-		// ===============================
-		// 6️⃣ GET INSTRUCTORS BY SKILL
-		// ===============================
 		[HttpGet("instructors")]
 		public IActionResult GetInstructors(string skill)
 		{
-			var instructors = _context.Instructor
-				.Where(i => i.InstructorSkills.Contains(skill))
-				.Select(i => new
-				{
-					i.InstructorId,
-					i.InstructorName,
-					i.InstructorSkills
-				})
-				.ToList();
-
-			return Ok(instructors);
+			return Ok(_service.GetInstructors(skill));
 		}
 
-		// ===============================
-		// 7️⃣ AUTO ASSIGN STUDENTS → BATCHES
-		// ===============================
-		[HttpPost("auto-assign-batches")]
-		public IActionResult AutoAssignBatches([FromBody] AutoAssignBatchDTO dto)
+		[HttpGet("batches")]
+		public IActionResult GetBatches(string program, int year)
 		{
-			var students = _context.Student
-				.Where(s =>
-					s.StudentQualification == dto.Qualification &&
-					s.StudentProgram == dto.Program)
-				.OrderBy(s => s.StudentId)
-				.ToList();
-
-			if (!students.Any())
-				return BadRequest("No students found");
-
-			int batchSize = dto.BatchSize;
-			int batchCounter = _context.CourseBatches.Count() + 1;
-			int assigned = 0;
-
-			for (int i = 0; i < students.Count; i += batchSize)
-			{
-				var batchId = $"B{batchCounter:D3}";
-
-				var batch = new CourseBatch
-				{
-					BatchId = batchId,
-					CourseId = dto.CourseId,
-					InstructorId = dto.InstructorId,
-					MaxStudents = batchSize,
-					CurrentStudents = 0,
-					IsActive = true
-				};
-
-				_context.CourseBatches.Add(batch);
-				_context.SaveChanges();
-
-				var group = students.Skip(i).Take(batchSize).ToList();
-
-				foreach (var student in group)
-				{
-					_context.StudentBatchAssignments.Add(new StudentBatchAssignment
-					{
-						BatchId = batchId,
-						StudentId = student.StudentId
-					});
-
-					batch.CurrentStudents++;
-					assigned++;
-				}
-
-				batch.IsActive = batch.CurrentStudents < batch.MaxStudents;
-				_context.SaveChanges();
-
-				batchCounter++;
-			}
-
-			return Ok(new
-			{
-				Message = "Batch assignment completed",
-				TotalAssignedStudents = assigned
-			});
+			return Ok(_service.GetBatches(program, year));
 		}
 
-		// =====================================================
-		// 8️⃣ INSTRUCTOR → VIEW BATCHES
-		// =====================================================
-		[HttpGet("instructor/{instructorId}/batches")]
-		public IActionResult GetInstructorBatches(string instructorId)
+		[HttpGet("batch-count")]
+		public IActionResult GetBatchCount(string program, int year)
 		{
-			return Ok(_context.CourseBatches
-				.Where(b => b.InstructorId == instructorId)
-				.Select(b => new
-				{
-					b.BatchId,
-					b.Course.CourseName,
-					b.MaxStudents,
-					b.CurrentStudents,
-					b.IsActive
-				})
-				.ToList());
+			return Ok(_service.GetBatchCount(program, year));
 		}
 
-		// =====================================================
-		// 9️⃣ INSTRUCTOR → VIEW STUDENTS IN A BATCH
-		// =====================================================
 		[HttpGet("batch/{batchId}/students")]
 		public IActionResult GetStudentsInBatch(string batchId)
 		{
-			return Ok(_context.StudentBatchAssignments
-				.Where(s => s.BatchId == batchId)
-				.Select(s => new
-				{
-					s.Student.StudentId,
-					s.Student.StudentName,
-					s.Student.StudentEmail
-				})
-				.ToList());
+			return Ok(_service.GetStudentsInBatch(batchId));
 		}
+
+		[HttpPost("assign-batches")]
+		public IActionResult AssignBatches([FromBody] AutoAssignBatchDTO dto)
+		{
+			return Ok(_service.AssignBatches(dto));
+		}
+
 		[HttpPost("assign-single-batch")]
 		public IActionResult AssignSingleBatch([FromBody] AutoAssignBatchDTO dto)
 		{
-			// 1️⃣ Get unassigned students
-			var students = _context.Student
-				.Where(s =>
-					s.StudentQualification == dto.Qualification &&
-					s.StudentProgram == dto.Program &&
-					!_context.StudentBatchAssignments.Any(a =>
-						a.StudentId == s.StudentId &&
-						a.Batches.CourseId == dto.CourseId))
-				.ToList();
-
-			if (!students.Any())
-				return BadRequest("No students left to assign");
-
-			// 2️⃣ Create Batch
-			int batchCount = _context.CourseBatches.Count() + 1;
-			string batchId = $"B{batchCount:D3}";
-
-			var batch = new CourseBatch
-			{
-				BatchId = batchId,
-				CourseId = dto.CourseId,
-				InstructorId = dto.InstructorId,
-				MaxStudents = dto.BatchSize,
-				CurrentStudents = 0,
-				IsActive = true
-			};
-
-			_context.CourseBatches.Add(batch);
-			_context.SaveChanges();
-
-			// 3️⃣ Assign students (ONLY batchSize)
-			var batchStudents = students.Take(dto.BatchSize).ToList();
-
-			foreach (var student in batchStudents)
-			{
-				_context.StudentBatchAssignments.Add(new StudentBatchAssignment
-				{
-					BatchId = batchId,
-					StudentId = student.StudentId
-				});
-
-				batch.CurrentStudents++;
-			}
-
-			_context.SaveChanges();
-
-			int remaining = students.Count - batchStudents.Count;
-
-			// 4️⃣ Response (IMPORTANT)
-			return Ok(new
-			{
-				Message = "Batch assigned successfully",
-				BatchId = batchId,
-				AssignedStudents = batchStudents.Count,
-				RemainingStudents = remaining,
-				NextStep = remaining > 0
-					? "Assign next batch to same or another instructor"
-					: "All students assigned"
-			});
+			return Ok(_service.AssignSingleBatch(dto));
 		}
 
-		// =====================================================
-		// 🔟 INSTRUCTOR FULL DASHBOARD
-		// =====================================================
+		[HttpGet("instructor/{instructorId}/batches")]
+		public IActionResult GetInstructorBatches(string instructorId)
+		{
+			return Ok(_service.GetInstructorBatches(instructorId));
+		}
+
 		[HttpGet("instructor/{instructorId}/dashboard")]
 		public IActionResult InstructorDashboard(string instructorId)
 		{
-			var data = _context.CourseBatches
-				.Where(b => b.InstructorId == instructorId)
-				.Select(b => new
-				{
-					b.BatchId,
-					Course = new
-					{
-						b.Course.CourseId,
-						b.Course.CourseName
-					},
-					Students = _context.StudentBatchAssignments
-						.Where(s => s.BatchId == b.BatchId)
-						.Select(s => new
-						{
-							s.Student.StudentId,
-							s.Student.StudentName
-						}).ToList()
-				}).ToList();
-
-			return Ok(data);
+			return Ok(_service.InstructorDashboard(instructorId));
 		}
-
 	}
 }
-
-
-
-
-
-
-
-

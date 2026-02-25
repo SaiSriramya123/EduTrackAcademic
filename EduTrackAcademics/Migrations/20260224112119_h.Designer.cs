@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduTrackAcademics.Migrations
 {
     [DbContext(typeof(EduTrackAcademicsContext))]
-    [Migration("20260224073541_initial")]
-    partial class initial
+    [Migration("20260224112119_h")]
+    partial class h
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -519,6 +519,9 @@ namespace EduTrackAcademics.Migrations
                     b.Property<string>("StudentQualification")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
 
                     b.HasKey("StudentId");
 

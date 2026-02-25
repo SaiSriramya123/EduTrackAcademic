@@ -26,7 +26,7 @@ namespace EduTrackAcademics.Services
             {
                 return _repo.GetLastModifiedDate(enrollmentId);
             }
-            public List<Performance> GetInstructorBatches(int instructorId)
+            public List<CourseBatch> GetInstructorBatches(string instructorId)
             {
                 return _repo.GetInstructorBatches(instructorId);
             }

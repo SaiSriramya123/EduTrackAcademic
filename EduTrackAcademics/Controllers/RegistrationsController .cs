@@ -33,7 +33,7 @@ namespace EduTrackAcademics.Controllers
 		}
 
 
-		// STUDENT REGISTRATION
+		
 		[HttpPost("StudentDetails")]
 		public IActionResult StudentRegister(StudentDTO dto)
 		{
@@ -45,6 +45,7 @@ namespace EduTrackAcademics.Controllers
 				StudentQualification = dto.StudentQualification,
 				StudentProgram = dto.StudentProgram,
 				StudentAcademicYear = dto.StudentAcademicYear,
+				Year = dto.year,
 				StudentGender = dto.StudentGender,
 				StudentPassword = dto.StudentPassword
 			};

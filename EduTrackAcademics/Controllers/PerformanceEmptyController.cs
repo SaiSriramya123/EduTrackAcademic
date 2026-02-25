@@ -20,15 +20,19 @@ namespace EduTrackAcademics.Controllers
         {
             return Ok(_service.GetCompletionPercentage(enrollmentId));
         }
+
         [HttpGet("average/{enrollmentId}")]
         public IActionResult GetAverageScore(int enrollmentId)
         {
-            return Ok(_service.GetAverageScore(enrollmentId));
+            var result= _service.GetAverageScore(enrollmentId);
+            return Ok(result);
         }
+
         [HttpGet("lastupdated/{enrollmentId}")]
         public IActionResult GetLastUpdated(int enrollmentId)
         {
-            return Ok(_service.GetLastModifiedDate(enrollmentId));
+            var result= _service.GetLastModifiedDate(enrollmentId);
+            return Ok(result);
         }
         [HttpGet("instructor-batches/{instructorId}")]
 

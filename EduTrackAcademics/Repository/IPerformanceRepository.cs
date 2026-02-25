@@ -1,5 +1,5 @@
 ﻿using EduTrackAcademics.Model;
-
+using System.Collections.Generic;
 namespace EduTrackAcademics.Repository
 {
     public interface IPerformanceRepository
@@ -7,7 +7,7 @@ namespace EduTrackAcademics.Repository
         decimal GetCompletionPercentage(int enrollmentId);
         decimal GetAverageScore(int enrollmentId);
         DateTime GetLastModifiedDate(int enrollmentId);
-        List<Performance> GetInstructorBatches(int instructorId);
-        List<Performance> GetBatchPerformance(int batchId);
+        List<CourseBatch> GetInstructorBatches(string  instructorId);
+        List<StudentBatchAssignment> GetBatchPerformance(string  batchId);
     }
 }

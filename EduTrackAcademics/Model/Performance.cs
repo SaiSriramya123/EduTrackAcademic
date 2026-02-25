@@ -20,7 +20,7 @@ namespace EduTrackAcademics.Model
         [Range(0, 100, ErrorMessage = "CompletionPercentage must be between 0 and 100.")]
         [RegularExpression(@"^\d{1,3}(\.\d{1,2})?$", ErrorMessage = "CompletionPercentage must be a decimal with up to 3 digits before and 2 digits after the decimal.")]
         public decimal CompletionPercentage { get; set; }
-
+        
         [Required]
         [DataType(DataType.Date)]
         [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "LastUpdated must be in yyyy-MM-dd format.")]
@@ -32,9 +32,12 @@ namespace EduTrackAcademics.Model
         [RegularExpression(@"^\d{1,3}(\.\d{1,2})?$", ErrorMessage = "AvgScore must be a decimal with up to 3 digits before and 2 digits after the decimal.")]
         public decimal AvgScore { get; set; }
         [Required]
-        public int BatchId { get; set; }
+        public string  BatchId { get; set; }
         [Required]
         public int InstructorId { get; set; }
+        [Required][ForeignKey("Student")] 
+        public string StudentId { get; set; }
+        public Student Student { get; set; }
     }
 }
 

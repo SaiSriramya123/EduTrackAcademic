@@ -25,5 +25,6 @@ namespace EduTrackAcademics.Model
 		[Required]
 		[StringLength(500)]
 		public string LearningObjectives { get; set; }
+		public List<Content> Content { get; internal set; } = new List<Content>();
 	}
 }

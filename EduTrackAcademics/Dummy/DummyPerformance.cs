@@ -10,7 +10,7 @@ namespace EduTrackAcademics.Dummy
             new Performance
             {
                 EnrollmentId=1,
-                AvgScore=75,
+                //AvgScore=75,
                 CompletionPercentage=89,
                 LastUpdated=DateTime.Now.AddDays(-1),
                 BatchId=101,
@@ -19,7 +19,7 @@ namespace EduTrackAcademics.Dummy
              new Performance
             {
                 EnrollmentId=2,
-                AvgScore=85,
+               // AvgScore=85,
                 CompletionPercentage=60,
                 LastUpdated=DateTime.Now.AddDays(-2),
                   BatchId=102,
@@ -28,7 +28,7 @@ namespace EduTrackAcademics.Dummy
               new Performance
             {
                 EnrollmentId=3,
-                AvgScore=90,
+                //AvgScore=90,
                 CompletionPercentage=95,
                 LastUpdated=DateTime.Now,
                    BatchId=103,
