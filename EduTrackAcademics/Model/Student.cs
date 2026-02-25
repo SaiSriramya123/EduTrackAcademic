@@ -14,6 +14,7 @@ namespace EduTrackAcademics.Model
 		[Required, EmailAddress]
 		public string StudentEmail { get; set; }
 
+		public string Role { get; set; } = "Student"; // Default role
 		[Required]
 		public long StudentPhone { get; set; }
 

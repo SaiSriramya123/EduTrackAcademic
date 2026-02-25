@@ -13,6 +13,7 @@ namespace EduTrackAcademics.Model
 
 		public string InstructorEmail { get; set; }
 
+		public string Role { get; set; }
 		public long InstructorPhone { get; set; }
 
 		public string InstructorQualification { get; set; }
@@ -27,7 +28,7 @@ namespace EduTrackAcademics.Model
 
 		public string InstructorPassword { get; set; }
 
-		public string ResumePath { get; set; } // ✅ store path
+		public string ResumePath { get; set; } 
 	}
 }
 

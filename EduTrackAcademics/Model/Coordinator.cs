@@ -13,6 +13,8 @@ namespace EduTrackAcademics.Model
 		[Required, EmailAddress]
 		public string CoordinatorEmail { get; set; }
 
+		public string Role { get; set; } 
+
 		public long CoordinatorPhone { get; set; }
 
 		public string CoordinatorQualification { get; set; }

@@ -4,6 +4,10 @@ using EduTrackAcademics.Repository;
 using EduTrackAcademics.Service;
 using EduTrackAcademics.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using EduTrackAcademics.AuthFolder;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +60,23 @@ builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesReposi
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
 builder.Services.AddSingleton<DummyEnrollment>();
 
+//create builder classes for StudentProfile
+builder.Services.AddScoped<IStudentDashboardRepo, StudentDashboardRepo>();
+builder.Services.AddScoped<IStudentProfileRepo, StudentProfileRepo>();
+builder.Services.AddScoped<IAuthorization, Authorization>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) .
+	AddJwtBearer(options => { 
+	options.TokenValidationParameters = new TokenValidationParameters 
+	  { 
+		ValidateIssuer = false, // set true if you want issuer
+	    ValidateAudience = false, // set true if you want audience validation
+		ValidateLifetime = true, 
+		ValidateIssuerSigningKey = true, 
+		IssuerSigningKey = new SymmetricSecurityKey( Encoding.UTF8.GetBytes("This_is_my_first_Test_Key_for_jwt_token"))
+	   }; 
+	});
+
 // =======================
 // CORS
 // =======================
@@ -81,6 +102,8 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseAuthorization();
+app.UseAuthentication();
 
 app.UseCors("AllowAll");
 app.MapControllers();
