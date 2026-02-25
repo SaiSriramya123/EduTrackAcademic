@@ -1,28 +1,44 @@
-﻿using EduTrackAcademics.Services;
+﻿using EduTrackAcademics.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EduTrackAcademics.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class AcademicReportController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AcademicReportController : ControllerBase
+    private readonly EduTrackAcademicsContext _context;
+
+    public AcademicReportController(EduTrackAcademicsContext context)
     {
-        private readonly IAcademicReportService _service;
-        public AcademicReportController(IAcademicReportService service)
-        {
-            _service = service;
-        }
-        [HttpGet("batches")]
-        public IActionResult GetBatches()
-        {
-            var result = _service.GetBatches();
-            return Ok(result);
-        }
-        [HttpGet("batch-details/{reportId}")]
-        public IActionResult GetBatchDetails(string reportId)
-        {
-            var result = _service.GetBatchDetails(reportId);
-            return Ok(result);
-        }
+        _context = context;
+    }
+
+    // ===============================
+    // GET ALL BATCHES WITH STUDENTS
+    // ===============================
+    [HttpGet("batches")]
+    public IActionResult GetBatchesWithStudents()
+    {
+        var data = _context.CourseBatches
+            .Select(b => new
+            {
+                b.BatchId,
+                b.CourseId,
+                b.MaxStudents,
+                b.CurrentStudents,
+            
+
+                Students = _context.StudentBatchAssignments
+                    .Where(sba => sba.BatchId == b.BatchId)
+                    .Select(sba => new
+                    {
+                        sba.Student.StudentId,
+                        sba.Student.StudentName,
+                        sba.Student.StudentEmail
+                    })
+                    .ToList()
+            })
+            .ToList();
+
+        return Ok(data);
     }
 }

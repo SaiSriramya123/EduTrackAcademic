@@ -10,6 +10,7 @@ namespace EduTrackAcademics.Repository
     {
 
         private readonly DummyPerformance _dummy = new();
+      
         public decimal GetCompletionPercentage(int enrollmentId)
         {
             return (from p in _dummy.Performances
