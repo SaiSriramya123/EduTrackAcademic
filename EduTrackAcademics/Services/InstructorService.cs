@@ -21,12 +21,12 @@ namespace EduTrackAcademics.Services
 		public Task<object> GetDashboard(string instructorId) 
 			=> _repo.GetDashboard(instructorId);
 
-		public Task AddModule(Module module) 
-			=> _repo.AddModule(module);
-		public Task UpdateModule(Module module) 
-			=> _repo.UpdateModule(module);
-		public Task DeleteModule(string id) 
-			=> _repo.DeleteModule(id);
+		public Task AddModuleAsync(Module module) 
+			=> _repo.AddModuleAsync(module);
+		public Task UpdateModuleAsync(string id, Module module) 
+			=> _repo.UpdateModuleAsync(id, module);
+		public Task DeleteModuleAsync(string id) 
+			=> _repo.DeleteModuleAsync(id);
 		public Task<object> GetModules(string courseId) 
 			=> _repo.GetModules(courseId);
 		public Task<bool> CompleteModule(string moduleId) 
