@@ -19,6 +19,7 @@ namespace EduTrackAcademics.DTO
 		public string StudentQualification { get; set; }
 		public string StudentProgram { get; set; }
 		public DateTime StudentAcademicYear { get; set; }
+		public int year {  get; set; } = 0;
 		public string StudentGender { get; set; }
 
 		[Required]

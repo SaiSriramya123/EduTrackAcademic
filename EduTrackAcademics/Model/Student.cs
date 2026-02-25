@@ -20,11 +20,18 @@ namespace EduTrackAcademics.Model
 		public string StudentQualification { get; set; }
 		public string StudentProgram { get; set; }
 		public DateTime StudentAcademicYear { get; set; }
+		public int Year { get; set; }
 		public string StudentGender { get; set; }
 
 		[Required]
-		public string StudentPassword { get; set; } // Later hash it
+		public string StudentPassword { get; set; }
+
+		public ICollection<Enrollment> Enrollments
+		{
+			get; set;// Later hash it
+		}
 	}
+}
 	//	[Key]
 	//	public string StudentId { get; set; }
 
@@ -64,4 +71,4 @@ namespace EduTrackAcademics.Model
 	//		ErrorMessage = "Password must be 8–64 chars and include uppercase, lowercase, number, and special character.")]
 	//	public string StudentPassword { get; set; }
 	//}
-}
+

@@ -4,6 +4,7 @@ using EduTrackAcademics.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduTrackAcademics.Migrations
 {
     [DbContext(typeof(EduTrackAcademicsContext))]
-    partial class EduTrackAcademicsContextModelSnapshot : ModelSnapshot
+    [Migration("20260224154505_notifi")]
+    partial class notifi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -300,10 +303,7 @@ namespace EduTrackAcademics.Migrations
 
                     b.Property<string>("CourseId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Credits")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EnrollmentDate")
                         .HasColumnType("datetime2");
@@ -315,13 +315,12 @@ namespace EduTrackAcademics.Migrations
 
                     b.Property<string>("StudentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("credits")
+                        .HasColumnType("int");
 
                     b.HasKey("EnrollmentId");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("Enrollment");
                 });
@@ -757,25 +756,6 @@ namespace EduTrackAcademics.Migrations
                     b.Navigation("Instructor");
                 });
 
-            modelBuilder.Entity("EduTrackAcademics.Model.Enrollment", b =>
-                {
-                    b.HasOne("EduTrackAcademics.Model.Course", "Course")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EduTrackAcademics.Model.Student", "Student")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("EduTrackAcademics.Model.InstructorCourseAssignment", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Course", "Course")
@@ -874,11 +854,6 @@ namespace EduTrackAcademics.Migrations
                     b.Navigation("Questions");
                 });
 
-            modelBuilder.Entity("EduTrackAcademics.Model.Course", b =>
-                {
-                    b.Navigation("Enrollments");
-                });
-
             modelBuilder.Entity("EduTrackAcademics.Model.Module", b =>
                 {
                     b.Navigation("Content");
@@ -892,11 +867,6 @@ namespace EduTrackAcademics.Migrations
             modelBuilder.Entity("EduTrackAcademics.Model.Qualification", b =>
                 {
                     b.Navigation("Programs");
-                });
-
-            modelBuilder.Entity("EduTrackAcademics.Model.Student", b =>
-                {
-                    b.Navigation("Enrollments");
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.StudentBatchAssignment", b =>

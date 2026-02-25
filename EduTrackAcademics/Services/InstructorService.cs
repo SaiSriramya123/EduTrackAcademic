@@ -1,5 +1,7 @@
-﻿using EduTrackAcademics.Model;
+﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.Model;
 using EduTrackAcademics.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Services
 {
@@ -12,31 +14,57 @@ namespace EduTrackAcademics.Services
 			_repo = repo;
 		}
 
-		public List<CourseBatch> GetBatches(string instructorId)
+		public Task<object> GetBatches(string instructorId) 
 			=> _repo.GetBatches(instructorId);
-
-		public List<StudentBatchAssignment> GetStudents(string batchId)
+		public Task<object> GetStudents(string batchId) 
 			=> _repo.GetStudents(batchId);
+		public Task<object> GetDashboard(string instructorId) 
+			=> _repo.GetDashboard(instructorId);
 
-		public List<Module> GetModules(string courseId)
+		public Task AddModuleAsync(Module module) 
+			=> _repo.AddModuleAsync(module);
+		public Task UpdateModuleAsync(string id, Module module) 
+			=> _repo.UpdateModuleAsync(id, module);
+		public Task DeleteModuleAsync(string id) 
+			=> _repo.DeleteModuleAsync(id);
+		public Task<object> GetModules(string courseId) 
 			=> _repo.GetModules(courseId);
+		public Task<bool> CompleteModule(string moduleId) 
+			=> _repo.CompleteModule(moduleId);
 
-		public List<Content> GetContent(string moduleId)
+		public Task AddContent(Content content) 
+			=> _repo.AddContent(content);
+		public Task UpdateContent(Content content) 
+			=> _repo.UpdateContent(content);
+		public Task DeleteContent(string id) 
+			=> _repo.DeleteContent(id);
+		public Task<object> GetContent(string moduleId) 
 			=> _repo.GetContent(moduleId);
 
-		public List<Assessment> GetAssessments(string courseId)
+		public Task AddAssessment(Assessment a) 
+			=> _repo.AddAssessment(a);
+		public Task UpdateAssessment(Assessment a) 
+			=> _repo.UpdateAssessment(a);
+		public Task DeleteAssessment(string id) 
+			=> _repo.DeleteAssessment(id);
+		public Task<object> GetAssessments(string courseId) 
 			=> _repo.GetAssessments(courseId);
-
-		public List<Question> GetQuestions(string assessmentId)
+		public Task<object> GetQuestions(string assessmentId) 
 			=> _repo.GetQuestions(assessmentId);
+		public Task EvaluateAssessment(string id, int marks, string feedback) 
+			=> _repo.EvaluateAssessment(id, marks, feedback);
 
-		public void Evaluate(string assessmentId, int marks, string feedback)
-			=> _repo.Evaluate(assessmentId, marks, feedback);
-
-		public void MarkAttendance(Attendance attendance)
-			=> _repo.SaveAttendance(attendance);
-
-		public List<Attendance> GetAttendance(string batchId)
+		public Task MarkAttendance(Attendance a) 
+			=> _repo.MarkAttendance(a);
+		public Task UpdateAttendance(string id, Attendance updated) 
+			=> _repo.UpdateAttendance(id, updated);
+		public Task DeleteAttendance(string id, string reason) 
+			=> _repo.DeleteAttendance(id, reason);
+		public Task<object> GetAttendance(string batchId) 
 			=> _repo.GetAttendance(batchId);
+		public Task<object> GetAttendanceReport(string batchId) 
+			=> _repo.GetAttendanceReport(batchId);
+		public Task<object> GetIrregularStudents(string batchId) 
+			=> _repo.GetIrregularStudents(batchId);
 	}
 }

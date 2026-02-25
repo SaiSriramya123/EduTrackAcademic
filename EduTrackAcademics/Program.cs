@@ -1,6 +1,7 @@
 using EduTrackAcademics.Data;
 using EduTrackAcademics.Dummy;
 using EduTrackAcademics.Repository;
+using EduTrackAcademics.Service;
 using EduTrackAcademics.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,8 +26,9 @@ builder.Services.AddSwaggerGen();
 // =======================
 // Dependency Injection
 // =======================
-builder.Services.AddScoped<ICoordinatorService, CoordinatorService>();
-builder.Services.AddScoped<ICoordinatorrepo, Coordinatorrepo>();
+builder.Services.AddScoped<ICoordinatorDashboardRepo, CoordinatorDashboardRepo>();
+builder.Services.AddScoped<ICoordinatorDashboardService, CoordinatorDashboardService > ();
+
 
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IInstructorRepo, InstructorRepo>();
@@ -52,7 +54,7 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
-builder.Services.AddSingleton<DummyEnrollment>();
+//builder.Services.AddSingleton<DummyEnrollment>();
 
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();

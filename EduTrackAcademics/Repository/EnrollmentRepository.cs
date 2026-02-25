@@ -30,8 +30,10 @@ namespace EduTrackAcademics.Repository
 		public async Task<int> AddEnrollmentAsync(Enrollment enrollment)
 		{
 			_context.Enrollment.Add(enrollment);
-			return await Task.FromResult(1);
+			await _context.SaveChangesAsync();   // ✅ persist changes
+			return 1;
 		}
+
 
 		public async Task<bool> IsEnrolledAsync(string studentId, string courseId)
 		{

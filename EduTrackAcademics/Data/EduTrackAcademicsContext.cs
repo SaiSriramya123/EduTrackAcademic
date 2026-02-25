@@ -16,7 +16,9 @@ namespace EduTrackAcademics.Data
 
         public DbSet<EduTrackAcademics.Model.Course> Course { get; set; } = default!;
         public DbSet<EduTrackAcademics.Model.Student> Student { get; set; }
-        public DbSet<EduTrackAcademics.Model.Instructor> Instructor { get; set; }
+		public DbSet<EduTrackAcademics.Model.StudentAdditionalDetails> StudentAdditionalDetails { get; set; }
+		public DbSet<EduTrackAcademics.Model.StudentLoginHistory> AuditLog { get; set; }
+		public DbSet<EduTrackAcademics.Model.Instructor> Instructor { get; set; }
 		public DbSet<EduTrackAcademics.Model.Coordinator> Coordinator{ get; set; }
 		public DbSet<EduTrackAcademics.Model.Qualification>Qualification { get; set; }
 		public DbSet<EduTrackAcademics.Model.AcademicYear> AcademicYear { get; set; }
@@ -30,7 +32,9 @@ namespace EduTrackAcademics.Data
 		public DbSet<StudentCourseAssignment> StudentCourseAssignments { get; set; }
 		public DbSet<InstructorCourseAssignment> InstructorCourseAssignments { get; set; }
 		public DbSet<CourseBatch> CourseBatches { get; set; }
+		public DbSet<Notification> Notification{ get; set; }
 		public DbSet<StudentBatchAssignment> StudentBatchAssignments { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Qualification>()
