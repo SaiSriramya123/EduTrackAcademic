@@ -30,21 +30,21 @@ namespace EduTrackAcademics.Controllers
 			=> Ok(await _service.GetDashboard(instructorId));
 
 		[HttpPost("module/add")] 
-		public async Task<IActionResult> AddModule(Module m) { 
-			await _service.AddModule(m); 
-			return Ok(); 
+		public async Task<IActionResult> AddModule([FromBody] Module m) { 
+			await _service.AddModuleAsync(m); 
+			return Ok("Module added"); 
 		}
 
-		[HttpPut("module/update")] 
-		public async Task<IActionResult> UpdateModule(Module m) { 
-			await _service.UpdateModule(m); 
-			return Ok(); 
+		[HttpPut("module/update/{id}")] 
+		public async Task<IActionResult> UpdateModule(string id, [FromBody] Module m) { 
+			await _service.UpdateModuleAsync(id, m); 
+			return Ok("Module updated"); 
 		}
 
-		[HttpDelete("module/{id}")] 
+		[HttpDelete("module/delete/{id}")] 
 		public async Task<IActionResult> DeleteModule(string id) { 
-			await _service.DeleteModule(id); 
-			return Ok(); 
+			await _service.DeleteModuleAsync(id); 
+			return Ok("Deleted"); 
 		}
 
 		[HttpGet("course/{courseId}/modules")] 

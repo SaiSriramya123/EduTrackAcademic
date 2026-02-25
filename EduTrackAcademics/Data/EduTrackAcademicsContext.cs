@@ -34,6 +34,7 @@ namespace EduTrackAcademics.Data
 		public DbSet<CourseBatch> CourseBatches { get; set; }
 		public DbSet<Notification> Notification{ get; set; }
 		public DbSet<StudentBatchAssignment> StudentBatchAssignments { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Qualification>()

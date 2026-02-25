@@ -58,7 +58,7 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
-builder.Services.AddSingleton<DummyEnrollment>();
+//builder.Services.AddSingleton<DummyEnrollment>();
 
 //create builder classes for StudentProfile
 builder.Services.AddScoped<IStudentDashboardRepo, StudentDashboardRepo>();
