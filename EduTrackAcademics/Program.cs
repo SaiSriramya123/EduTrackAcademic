@@ -7,25 +7,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =======================
-// Database
-// =======================
+
+
 builder.Services.AddDbContext<EduTrackAcademicsContext>(options =>
 	options.UseSqlServer(
 		builder.Configuration.GetConnectionString("EduTrackAcademicsContext")
 		?? throw new InvalidOperationException("Connection string not found")
 	));
 
-// =======================
-// Controllers & Swagger
-// =======================
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// =======================
-// Dependency Injection
-// =======================
+
 builder.Services.AddScoped<ICoordinatorDashboardRepo, CoordinatorDashboardRepo>();
 builder.Services.AddScoped<ICoordinatorDashboardService, CoordinatorDashboardService > ();
 
@@ -56,9 +51,7 @@ builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesReposi
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
 builder.Services.AddSingleton<DummyEnrollment>();
 
-// =======================
-// CORS
-// =======================
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowAll", policy =>
@@ -69,9 +62,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// =======================
-// Middleware
-// =======================
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -84,5 +74,6 @@ app.UseStaticFiles();
 
 app.UseCors("AllowAll");
 app.MapControllers();
+
 
 app.Run();

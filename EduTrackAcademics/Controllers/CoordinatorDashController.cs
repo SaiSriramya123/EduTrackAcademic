@@ -57,11 +57,11 @@ namespace EduTrackAcademics.Controllers
 			return Ok(_service.GetBatches(program, year));
 		}
 
-		[HttpGet("batch-count")]
-		public IActionResult GetBatchCount(string program, int year)
-		{
-			return Ok(_service.GetBatchCount(program, year));
-		}
+		//[HttpGet("batch-count")]
+		//public IActionResult GetBatchCount(string program, int year)
+		//{
+		//	return Ok(_service.GetBatchCount(program, year));
+		//}
 
 		[HttpGet("batch/{batchId}/students")]
 		public IActionResult GetStudentsInBatch(string batchId)
