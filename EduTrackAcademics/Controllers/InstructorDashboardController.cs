@@ -1,4 +1,6 @@
 ﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.DTO;
+using EduTrackAcademics.Exception;
 using EduTrackAcademics.Model;
 using EduTrackAcademics.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,133 +13,209 @@ namespace EduTrackAcademics.Controllers
 	public class InstructorDashboardController : ControllerBase
 	{
 		private readonly IInstructorService _service;
+		private readonly EduTrackAcademicsContext _context;
 
-		public InstructorDashboardController(IInstructorService service)
+		public InstructorDashboardController(EduTrackAcademicsContext context,IInstructorService service)
 		{
 			_service = service;
+			_context =context;
 		}
 
-		[HttpGet("{instructorId}/batches")]
-		public async Task<IActionResult> GetBatches(string instructorId)
-		=> Ok(await _service.GetBatches(instructorId));
+		// MODULE
 
-		[HttpGet("batch/{batchId}/students")]
-		public async Task<IActionResult> GetStudents(string batchId)
-			=> Ok(await _service.GetStudents(batchId));
+		[HttpPost("module")]
+		public async Task<IActionResult> CreateModule(ModuleDTO dto)
+		{
+			var result = await _service.CreateModuleAsync(dto);
 
-		[HttpGet("{instructorId}/dashboard")]
-		public async Task<IActionResult> Dashboard(string instructorId)
-			=> Ok(await _service.GetDashboard(instructorId));
-
-		[HttpPost("module/add")] 
-		public async Task<IActionResult> AddModule(Module m) { 
-			await _service.AddModule(m); 
-			return Ok(); 
+			return Ok(new
+			{
+				message = result.message,
+				moduleId = result.module.ModuleID,
+				courseId = result.module.CourseID,
+				name = result.module.Name,
+				sequenceOrder = result.module.SequenceOrder,
+				learningObjectives = result.module.LearningObjectives
+			});
 		}
 
-		[HttpPut("module/update")] 
-		public async Task<IActionResult> UpdateModule(Module m) { 
-			await _service.UpdateModule(m); 
-			return Ok(); 
+		[HttpGet("modules/{courseId}")]
+		public async Task<IActionResult> GetModules(string courseId)
+		{
+			var modules = await _service.GetModulesAsync(courseId);
+
+			if (!modules.Any())
+				return NotFound("No modules found for this course");
+
+			return Ok(modules);
 		}
 
-		[HttpDelete("module/{id}")] 
-		public async Task<IActionResult> DeleteModule(string id) { 
-			await _service.DeleteModule(id); 
-			return Ok(); 
+		[HttpPut("module/{moduleId}")]
+		public async Task<IActionResult> UpdateModule(string moduleId, ModuleDTO dto)
+		{
+			var message = await _service.UpdateModuleAsync(moduleId, dto);
+
+			if (message == "Module not found")
+				return NotFound(message);
+
+			return Ok(new { message });
 		}
 
-		[HttpGet("course/{courseId}/modules")] 
-		public async Task<IActionResult> GetModules(string courseId) 
-			=> Ok(await _service.GetModules(courseId));
+		// CONTENT
 
-		[HttpPut("module/{id}/complete")] 
-		public async Task<IActionResult> Complete(string id) 
-			=> Ok(await _service.CompleteModule(id));
-
-		[HttpPost("content/add")] 
-		public async Task<IActionResult> AddContent(Content c) { 
-			await _service.AddContent(c); 
-			return Ok(); 
+		[HttpPost("content")]
+		public async Task<IActionResult> Create(ContentDTO dto)
+		{
+			try { return Ok(await _service.CreateContentAsync(dto)); }
+			catch (ApplicationException ex) { return BadRequest(ex.Message); }
 		}
 
-		[HttpPut("content/update")] 
-		public async Task<IActionResult> UpdateContent(Content c) { 
-			await _service.UpdateContent(c); 
-			return Ok(); 
+		[HttpGet("content/module/{moduleId}")]
+		public async Task<IActionResult> GetByModule(string moduleId)
+		{
+			return Ok(await _service.GetContentByModuleAsync(moduleId));
 		}
 
-		[HttpDelete("content/{id}")] 
-		public async Task<IActionResult> DeleteContent(string id) { 
-			await _service.DeleteContent(id); 
-			return Ok(); 
+		[HttpGet("content/{id}")]
+		public async Task<IActionResult> Get(string id)
+		{
+			try { return Ok(await _service.GetContentAsync(id)); }
+			catch (ApplicationException ex) { return NotFound(ex.Message); }
 		}
 
-		[HttpGet("module/{id}/content")] 
-		public async Task<IActionResult> GetContent(string id) 
-			=> Ok(await _service.GetContent(id));
-
-		[HttpPost("assessment/add")] 
-		public async Task<IActionResult> AddAssessment(Assessment a) { 
-			await _service.AddAssessment(a); 
-			return Ok(); 
+		[HttpPut("content/{id}")]
+		public async Task<IActionResult> Update(string id, ContentDTO dto)
+		{
+			try { return Ok(await _service.UpdateContentAsync(id, dto)); }
+			catch (ApplicationException ex) { return BadRequest(ex.Message); }
 		}
 
-		[HttpPut("assessment/update")] 
-		public async Task<IActionResult> UpdateAssessment(Assessment a) { 
-			await _service.UpdateAssessment(a); 
-			return Ok(); 
+		[HttpPut("content/publish/{id}")]
+		public async Task<IActionResult> Publish(string id)
+		{
+			try { return Ok(await _service.PublishContentAsync(id)); }
+			catch (ApplicationException ex) { return BadRequest(ex.Message); }
 		}
 
-		[HttpDelete("assessment/{id}")] 
-		public async Task<IActionResult> DeleteAssessment(string id) { 
-			await _service.DeleteAssessment(id); 
-			return Ok(); 
+		[HttpDelete("content/{id}")]
+		public async Task<IActionResult> Delete(string id)
+		{
+			try { return Ok(await _service.DeleteContentAsync(id)); }
+			catch (ApplicationException ex) { return NotFound(ex.Message); }
 		}
 
-		[HttpGet("course/{courseId}/assessments")] 
-		public async Task<IActionResult> GetAssessments(string courseId) 
-			=> Ok(await _service.GetAssessments(courseId));
+		// ASSESSMENT
 
-		[HttpGet("assessment/{id}/questions")] 
-		public async Task<IActionResult> GetQuestions(string id) 
-			=> Ok(await _service.GetQuestions(id));
+		[HttpPost("assessment")]
+		public async Task<IActionResult> CreateAssessment(AssessmentDTO dto)
+		=> Ok(await _service.CreateAssessmentAsync(dto));
 
-		[HttpPut("assessment/evaluate")] 
-		public async Task<IActionResult> Evaluate(string id, int marks, string feedback) { 
-			await _service.EvaluateAssessment(id, marks, feedback); 
-			return Ok(); 
+		[HttpGet("assessmentDetails/{id}")]
+		public async Task<IActionResult> GetAssessment(string id)
+			=> Ok(await _service.GetAssessmentByIdAsync(id));
+
+		[HttpGet("assessmentQuestions/{id}")]
+		public async Task<IActionResult> GetAllQuestions(string id)
+		{
+			var questions = await _context.Questions
+				.Where(q => q.AssessmentId == id)
+				.ToListAsync();
+
+			if (questions == null || !questions.Any())
+				return NotFound($"No questions found for assessment {id}");
+
+			return Ok(questions);
 		}
 
-		[HttpPost("attendance/mark")] 
-		public async Task<IActionResult> Mark(Attendance a) { 
-			await _service.MarkAttendance(a); 
-			return Ok(); 
+
+
+		[HttpGet("assessments/course/{courseId}")]
+		public async Task<IActionResult> GetAssessmentsByCourse(string courseId)
+			=> Ok(await _service.GetAssessmentsByCourseAsync(courseId));
+
+		[HttpPut("assessment/{id}")]
+		public async Task<IActionResult> UpdateAssessment(string id, AssessmentDTO dto)
+			=> Ok(await _service.UpdateAssessmentAsync(id, dto));
+
+		[HttpDelete("assessment/{id}")]
+		public async Task<IActionResult> DeleteAssessment(string id)
+			=> Ok(await _service.DeleteAssessmentAsync(id));
+
+		// QUESTIONS
+
+		[HttpPost("question")]
+		public async Task<IActionResult> AddQuestion(QuestionDTO dto)
+	   => Ok(await _service.AddQuestionAsync(dto));
+
+		[HttpGet("question/{id}")]
+		public async Task<IActionResult> GetQuestion(string id)
+			=> Ok(await _service.GetQuestionByIdAsync(id));
+
+		[HttpGet("questions/assessment/{assessmentId}")]
+		public async Task<IActionResult> GetQuestionsByAssessment(string assessmentId)
+			=> Ok(await _service.GetQuestionsByAssessmentAsync(assessmentId));
+
+		[HttpPut("question/{id}")]
+		public async Task<IActionResult> UpdateQuestion(string id, QuestionDTO dto)
+			=> Ok(await _service.UpdateQuestionAsync(id, dto));
+
+		[HttpDelete("question/{id}")]
+		public async Task<IActionResult> DeleteQuestion(string id)
+			=> Ok(await _service.DeleteQuestionAsync(id));
+
+		// ATTENDANCE
+
+		[HttpPost("attendance")]
+		public async Task<IActionResult> MarkAttendance([FromBody] AttendanceDTO dto)
+		{
+			var result = await _service.MarkAttendanceAsync(dto);
+			return Ok(result);
 		}
 
-		[HttpPut("attendance/{id}")] 
-		public async Task<IActionResult> UpdateAtt(string id, Attendance a) { 
-			await _service.UpdateAttendance(id, a); 
-			return Ok(); 
+		[HttpGet("attendance")]
+		public async Task<IActionResult> GetAllAttendance()
+		{
+			var result = await _service.GetAllAttendanceAsync();
+			return Ok(result);
 		}
 
-		[HttpDelete("attendance/{id}")] 
-		public async Task<IActionResult> DeleteAtt(string id, string reason) { 
-			await _service.DeleteAttendance(id, reason); 
-			return Ok(); 
+		[HttpGet("attendance/date/{date}")]
+		public async Task<IActionResult> GetAttendanceByDate(DateTime date)
+		{
+			var result = await _service.GetAttendanceByDateAsync(date);
+			return Ok(result);
 		}
 
-		[HttpGet("attendance/{batchId}")] 
-		public async Task<IActionResult> GetAtt(string batchId) 
-			=> Ok(await _service.GetAttendance(batchId));
+		[HttpGet("attendance/batch/{batchId}")]
+		public async Task<IActionResult> GetAttendanceByBatch(string batchId)
+		{
+			var result = await _service.GetAttendanceByBatchAsync(batchId);
+			return Ok(result);
+		}
 
-		[HttpGet("attendance/report/{batchId}")] 
-		public async Task<IActionResult> Report(string batchId) 
-			=> Ok(await _service.GetAttendanceReport(batchId));
+		[HttpGet("attendance/enrollment/{enrollmentId}")]
+		public async Task<IActionResult> GetAttendanceByEnrollment(string enrollmentId)
+		{
+			var result = await _service.GetAttendanceByEnrollmentAsync(enrollmentId);
+			return Ok(result);
+		}
 
-		[HttpGet("attendance/irregular/{batchId}")] 
-		public async Task<IActionResult> Irregular(string batchId) 
-			=> Ok(await _service.GetIrregularStudents(batchId));
+		[HttpPut("attendance/{attendanceId}")]
+		public async Task<IActionResult> UpdateAttendance(string attendanceId, [FromBody] AttendanceDTO dto)
+		{
+			var result = await _service.UpdateAttendanceAsync(attendanceId, dto);
+			return Ok(result);
+		}
+
+		[HttpDelete("attendance/{attendanceId}")]
+		public async Task<IActionResult> DeleteAttendance(string attendanceId, [FromQuery] string reason)
+		{
+			var result = await _service.DeleteAttendanceAsync(attendanceId, reason);
+			if (result.Contains("not found"))
+				return NotFound(result);
+
+			return Ok(result);
+		}
 	}
 
 }

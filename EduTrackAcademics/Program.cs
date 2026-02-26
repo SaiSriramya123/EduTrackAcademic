@@ -49,7 +49,11 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
-builder.Services.AddSingleton<DummyEnrollment>();
+//builder.Services.AddSingleton<DummyEnrollment>();
+
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+
 
 
 builder.Services.AddCors(options =>

@@ -34,6 +34,7 @@ namespace EduTrackAcademics.Data
 		public DbSet<CourseBatch> CourseBatches { get; set; }
 		public DbSet<Notification> Notification{ get; set; }
 		public DbSet<StudentBatchAssignment> StudentBatchAssignments { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Qualification>()
@@ -50,9 +51,17 @@ namespace EduTrackAcademics.Data
 				.HasMany(y => y.Courses)
 				.WithOne(c => c.AcademicYear)
 				.HasForeignKey(c => c.AcademicYearId);
+			modelBuilder.Entity<Attendance>()
+				.HasOne(a => a.Enrollment)
+				.WithMany(e => e.Attendances)
+				.HasForeignKey(a => a.EnrollmentID)
+				.OnDelete(DeleteBehavior.Restrict);
+
 		}
-        public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;
+		public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;
 
 		public DbSet<EduTrackAcademics.Model.StudentProgress> StudentProgress { get; set; } = default!;
+        public DbSet<EduTrackAcademics.Model.Submission> Submission { get; set; } = default!;
+		public	DbSet<EduTrackAcademics.Model.StudentAnswer> StudentAnswer { get; set; } = default!;
 	}
 }

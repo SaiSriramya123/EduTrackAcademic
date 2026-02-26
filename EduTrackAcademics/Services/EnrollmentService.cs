@@ -17,26 +17,35 @@ namespace EduTrackAcademics.Services
 			_context = context;
 		}
 
-		public async Task<int> AddEnrollmentAsync(EnrollmentDto dto)
+		public async Task<string> AddEnrollmentAsync(EnrollmentDto dto)
 		{
+			// Generate unique EnrollmentId
 			int count = await _repo.GetEnrollmentCountAsync();
 			string enrollmentId = $"E{(count + 1):D3}";
 
 			if (await _repo.CheckIdExistsAsync(enrollmentId))
 				throw new EnrollmentAlreadyExistsException($"Enrollment already exists");
 
+			// Fetch course credits from DB
+			var course = await _context.Course.FindAsync(dto.CourseId);
+			if (course == null)
+				throw new ApplicationException("Course not found");
+
 			var enrollment = new Enrollment
 			{
 				EnrollmentId = enrollmentId,
 				StudentId = dto.StudentId,
 				CourseId = dto.CourseId,
-				EnrollmentDate = DateTime.Now,
-				Status = "Active"
+				EnrollmentDate = DateTime.Now,   
+				Status = "Active",
+				Credits = course.Credits      
 			};
 
-			return await _repo.AddEnrollmentAsync(enrollment);
+			 await _repo.AddEnrollmentAsync(enrollment);
+			return  enrollmentId;
 
 		}
+
 
 		public async Task<List<Module>> GetContentForStudentAsync(string studentId, string courseId)
 		{

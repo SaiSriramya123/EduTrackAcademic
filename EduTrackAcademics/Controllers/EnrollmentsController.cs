@@ -47,7 +47,7 @@ namespace EduTrackAcademics.Controllers
 			}
 
 			[HttpGet("content")]
-			public async Task<IActionResult> ViewCourseContent(EnrollmentDto dto)
+			public async Task<IActionResult> ViewCourseContent([FromQuery]EnrollmentDto dto)
 			{
 			try
 			{
@@ -66,7 +66,7 @@ namespace EduTrackAcademics.Controllers
 		}
 
 			[HttpGet("progress")]
-			public async Task<IActionResult> GetCourseProgress(EnrollmentDto dto)
+			public async Task<IActionResult> GetCourseProgress([FromQuery]EnrollmentDto dto)
 			{
 			try
 			{
@@ -85,7 +85,7 @@ namespace EduTrackAcademics.Controllers
 		}
 
 			[HttpPost("update-status")]
-			public async Task<IActionResult> ProcessCourseCompletion(EnrollmentDto dto)
+			public async Task<IActionResult> ProcessCourseCompletion([FromQuery] EnrollmentDto dto)
 			{
 			try
 			{

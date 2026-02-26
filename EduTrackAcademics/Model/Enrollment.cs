@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EduTrackAcademics.Model
@@ -19,12 +20,17 @@ namespace EduTrackAcademics.Model
 		public string Status { get; set; }
 
 		[Required]
-		public int credits { get; set; } = 0;
+		public int Credits { get; set; } = 0;
 
+		[Required]
 		[ForeignKey("Student")]
 		public string StudentId { get; set; }
+		public Student Student { get; set; }
 
+		[Required]
 		[ForeignKey("Course")]
 		public string CourseId { get; set; }
+		public Course Course { get; set; }
+		public ICollection<Attendance> Attendances { get; set; }
 	}
 }

@@ -1,36 +1,44 @@
-﻿using EduTrackAcademics.Model;
+﻿using EduTrackAcademics.DTO;
+using EduTrackAcademics.Model;
 
 namespace EduTrackAcademics.Services
 {
 	public interface IInstructorService
 	{
-		Task<object> GetBatches(string instructorId);
-		Task<object> GetStudents(string batchId);
-		Task<object> GetDashboard(string instructorId);
+		// MODULE
+		Task<(Module module, string message)> CreateModuleAsync(ModuleDTO dto);
+		Task<IEnumerable<object>> GetModulesAsync(string courseId);
+		Task<string> UpdateModuleAsync(string moduleId, ModuleDTO dto);
 
-		Task AddModule(Module module);
-		Task UpdateModule(Module module);
-		Task DeleteModule(string id);
-		Task<object> GetModules(string courseId);
-		Task<bool> CompleteModule(string moduleId);
+		// CONTENT
+		Task<string> CreateContentAsync(ContentDTO dto);
+		Task<List<Content>> GetContentByModuleAsync(string moduleId);
+		Task<Content> GetContentAsync(string contentId);
+		Task<string> UpdateContentAsync(string id, ContentDTO dto);
+		Task<string> PublishContentAsync(string id);
+		Task<string> DeleteContentAsync(string id);
 
-		Task AddContent(Content content);
-		Task UpdateContent(Content content);
-		Task DeleteContent(string id);
-		Task<object> GetContent(string moduleId);
+		// ASSESSMENT
+		Task<string> CreateAssessmentAsync(AssessmentDTO dto);
+		Task<Assessment> GetAssessmentByIdAsync(string assessmentId);
+		Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId);
+		Task<string> UpdateAssessmentAsync(string assessmentId, AssessmentDTO dto);
+		Task<string> DeleteAssessmentAsync(string assessmentId);
 
-		Task AddAssessment(Assessment a);
-		Task UpdateAssessment(Assessment a);
-		Task DeleteAssessment(string id);
-		Task<object> GetAssessments(string courseId);
-		Task<object> GetQuestions(string assessmentId);
-		Task EvaluateAssessment(string id, int marks, string feedback);
+		// QUESTIONS
+		Task<string> AddQuestionAsync(QuestionDTO dto);
+		Task<Question> GetQuestionByIdAsync(string questionId);
+		Task<List<Question>> GetQuestionsByAssessmentAsync(string assessmentId);
+		Task<string> UpdateQuestionAsync(string questionId, QuestionDTO dto);
+		Task<string> DeleteQuestionAsync(string questionId);
 
-		Task MarkAttendance(Attendance attendance);
-		Task UpdateAttendance(string id, Attendance updated);
-		Task DeleteAttendance(string id, string reason);
-		Task<object> GetAttendance(string batchId);
-		Task<object> GetAttendanceReport(string batchId);
-		Task<object> GetIrregularStudents(string batchId);
+		// ATTENDANCE
+		Task<string> MarkAttendanceAsync(AttendanceDTO dto);
+		Task<List<object>> GetAllAttendanceAsync();
+		Task<List<object>> GetAttendanceByDateAsync(DateTime date);
+		Task<List<object>>GetAttendanceByBatchAsync(string batchId);
+		Task<List<object>>GetAttendanceByEnrollmentAsync(string enrollmentId);
+		Task<string>UpdateAttendanceAsync(string attendanceId, AttendanceDTO dto);
+		Task<string> DeleteAttendanceAsync(string attendanceId, string reason);
 	}
 }

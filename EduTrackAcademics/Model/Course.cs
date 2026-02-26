@@ -20,5 +20,6 @@ namespace EduTrackAcademics.Model
 
 		[ForeignKey(nameof(AcademicYearId))]
 		public AcademicYear AcademicYear { get; set; }
+		public ICollection<Enrollment> Enrollments { get; set; }
 	}
 }
