@@ -119,7 +119,7 @@ namespace EduTrackAcademics.Controllers
 		//	});
 		//}
 
-		[HttpPut("{submissionId}")]
+		[HttpPut("UpdateFeedback/Score")]
 		public async Task<IActionResult> UpdateSubmission(UpdateSubmissionDto dto)
 		{
 	
