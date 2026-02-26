@@ -36,9 +36,9 @@ namespace EduTrackAcademics.Services
 				EnrollmentId = enrollmentId,
 				StudentId = dto.StudentId,
 				CourseId = dto.CourseId,
-				EnrollmentDate = DateTime.Now,   // ✅ auto-generated
+				EnrollmentDate = DateTime.Now,   
 				Status = "Active",
-				Credits = course.Credits         // ✅ taken from Course table
+				Credits = course.Credits      
 			};
 
 			 await _repo.AddEnrollmentAsync(enrollment);

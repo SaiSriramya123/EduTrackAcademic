@@ -61,5 +61,7 @@ namespace EduTrackAcademics.Data
 		public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;
 
 		public DbSet<EduTrackAcademics.Model.StudentProgress> StudentProgress { get; set; } = default!;
+        public DbSet<EduTrackAcademics.Model.Submission> Submission { get; set; } = default!;
+		public	DbSet<EduTrackAcademics.Model.StudentAnswer> StudentAnswer { get; set; } = default!;
 	}
 }
