@@ -1,8 +1,9 @@
-﻿using EduTrackAcademics.Model;
-using EduTrackAcademics.Repository;
-using NuGet.Protocol.Core.Types;
-using EduTrackAcademics.DTO;
+﻿using EduTrackAcademics.DTO;
 using EduTrackAcademics.Exception;
+using EduTrackAcademics.Model;
+using EduTrackAcademics.Repository;
+using Humanizer;
+using NuGet.Protocol.Core.Types;
 
 namespace EduTrackAcademics.Services
 {
@@ -58,6 +59,46 @@ namespace EduTrackAcademics.Services
 				throw new ApplicationException("No questions available");
 
 			return questions;
+		}
+
+		public async Task InsertOrUpdateAnswerAsync(StudentAnswerDto dto)
+		{
+			await _repo.InsertOrUpdateAnswerAsync(dto);
+		}
+
+		// Submit Assessment + Calculate Score
+		public async Task<string> SubmitAssessmentAsync(SubmitAssessmentDto dto)
+		{
+			// Create Submission entry
+			int count = await _repo.GetSubmissionCountAsync();
+			string submissionid= $"SB{(count + 1):D3}";
+			var submission = new Submission
+			{
+				SubmissionId = submissionid,
+				StudentID = dto.StudentId,
+				AssessmentId = dto.AssessmentId,
+				SubmissionDate = DateTime.Now,
+				Score = 0,
+				Feedback = ""
+			};
+
+			return await _repo.SubmitAssessmentAsync(submission);
+
+		}
+		// Calculate score & percentage
+		//public async Task<(int score, double percentage)> CalculateScoreAsync(SubmitAssessmentDto dto)
+		//{
+		//	var (score, percentage) = await _repo.CalculateScoreAsync(dto.StudentId,dto.AssessmentId);
+
+		//	return (score, percentage);
+		//}
+
+		//  Update Feedback and Scores
+		public async Task<(int score,double percentage)> AddFeedbackAsync(UpdateSubmissionDto dto) { 
+
+			var (score, percentage) = await _repo.CalculateScoreAsync(dto.StudentId, dto.AssessmentId);
+			await _repo.UpdateSubmissionAsync(dto.submissionId, dto.score, dto.Feedback);
+			return (score, percentage);
 		}
 	}
 }

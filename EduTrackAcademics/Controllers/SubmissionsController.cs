@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EduTrackAcademics.Data;
+using EduTrackAcademics.DTO;
 using EduTrackAcademics.Model;
 using EduTrackAcademics.Services;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using EduTrackAcademics.DTO;
 
 namespace EduTrackAcademics.Controllers
 {
@@ -78,6 +79,58 @@ namespace EduTrackAcademics.Controllers
 					message = ex.Message
 				});
 			}
+		}
+
+		[HttpPost("answer")]
+		public async Task<IActionResult> InsertOrUpdateAnswer(
+		[FromBody] StudentAnswerDto dto)
+		{
+			await _service.InsertOrUpdateAnswerAsync(dto);
+
+			return Ok(new
+			{
+				status = 200,
+				Message = "Answer saved successfully"
+			});
+		}
+
+		[HttpPost("submit")]
+		public async Task<IActionResult> SubmitAssessment([FromBody] SubmitAssessmentDto dto)
+		{
+			var result=await _service.SubmitAssessmentAsync(dto);
+
+			return Ok(new
+			{
+				SubmissionId = result,
+				Message = "Assessment submitted successfully"
+			});
+		}
+
+		//[HttpGet("Score/percentage")]
+		//public async Task<IActionResult> CalculateScore([FromBody] SubmitAssessmentDto dto)
+		//{
+		//	var result = await _service.CalculateScoreAsync(dto);
+
+		//	return Ok(new
+		//	{
+		//		Score = result.score,
+		//		Percentage = result.percentage,
+		//		Message = "Calculated score and percentage"
+		//	});
+		//}
+
+		[HttpPut("{submissionId}")]
+		public async Task<IActionResult> UpdateSubmission(UpdateSubmissionDto dto)
+		{
+	
+			 var result=await _service.AddFeedbackAsync(dto);
+
+			return Ok(new
+			{
+				Score = result.score,
+				Percentage = result.percentage,
+				Message = "Submission updated successfully"
+			});
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -25,14 +26,6 @@ namespace EduTrackAcademics.Repository
 
 		public async Task<List<ViewAssessmentDto>> GetAssessmentsByStudentIdAsync(string studentId)
 		{
-			//var result = await (
-			//	from e in _context.Enrollment
-			//	join a in _context.Assessments
-			//		on e.CourseId equals a.CourseID
-			//	join c in _context.Course
-			//		on a.CourseID equals c.CourseId
-			//	where e.StudentId == studentId
-			//	select a).ToListAsync();
 
 			var enrolledCourseIds = await _context.Enrollment
 			.Where(e => e.StudentId == studentId)
@@ -99,6 +92,100 @@ namespace EduTrackAcademics.Repository
 					OrderNo = q.OrderNo
 				})
 				.ToListAsync();
+		}
+
+		public async Task InsertOrUpdateAnswerAsync(StudentAnswerDto dto)
+		{
+			var existingAnswer = await _context.StudentAnswer
+				.FirstOrDefaultAsync(x =>
+					x.StudentId == dto.StudentId &&
+					x.AssessmentId == dto.AssessmentId &&
+					x.QuestionId == dto.QuestionId);
+
+			if (existingAnswer != null)
+			{
+				// Update existing answer
+				existingAnswer.Answer = dto.Answer;
+				existingAnswer.createdDate = DateTime.Now;
+			}
+			else
+			{
+				// Insert new answer
+				int count= await _context.StudentAnswer.CountAsync();
+				string newId= $"SA{(count + 1):D3}";
+				var answer = new StudentAnswer
+				{
+					StudentAnswerId = newId,
+					StudentId = dto.StudentId,
+					AssessmentId = dto.AssessmentId,
+					QuestionId = dto.QuestionId,
+					Answer = dto.Answer,
+					createdDate = DateTime.Now
+				};
+
+				await _context.StudentAnswer.AddAsync(answer);
+			}
+
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task<int> GetSubmissionCountAsync()
+		{
+			return await _context.Submission.CountAsync();
+		}
+
+		// SUBMIT ASSESSMENT
+		public async Task<string> SubmitAssessmentAsync(Submission submission)
+		{
+
+			await _context.Submission.AddAsync(submission);
+			await _context.SaveChangesAsync();
+
+			return submission.SubmissionId;
+		}
+
+		// CALCULATE SCORE & PERCENTAGE
+		public async Task<(int score, double percentage)> CalculateScoreAsync(string studentId, string assessmentId)
+		{
+			var questions = await _context.Questions
+				.Where(q => q.AssessmentId == assessmentId)
+				.ToListAsync();
+
+			var studentAnswers = await _context.StudentAnswer
+				.Where(a => a.StudentId == studentId && a.AssessmentId == assessmentId)
+				.ToListAsync();
+
+			int score = 0;
+
+			foreach (var question in questions)
+			{
+				var answer = studentAnswers
+					.FirstOrDefault(a => a.QuestionId == question.QuestionId);
+
+				if (answer != null && answer.Answer == question.CorrectOption)
+				{
+					score += question.Marks;
+				}
+			}
+
+			double percentage = questions.Count > 0 ? ((double)score / questions.Count) * 100 : 0;
+
+			return (score, percentage);
+		}
+
+		// UPDATE SCORE & FEEDBACK
+		public async Task UpdateSubmissionAsync(string submissionId, int score, string feedback)
+		{
+			var submission = await _context.Submission
+				.FirstOrDefaultAsync(s => s.SubmissionId == submissionId);
+
+			if (submission != null)
+			{
+				submission.Score = score;
+				submission.Feedback = feedback;
+
+				await _context.SaveChangesAsync();
+			}
 		}
 	}
 }
