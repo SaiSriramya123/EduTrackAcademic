@@ -30,9 +30,9 @@ namespace EduTrackAcademics.Model
 		[RegularExpression(@"^(A|B|C|D|True|False)?$", ErrorMessage = "Correct option must be A/B/C/D or True/False.")]
 		public string? CorrectOption { get; set; }
 
-		[Required]
-		[StringLength(500, ErrorMessage = "Answer text cannot exceed 300 characters.")]
-		public string? AnswerText { get; set; }
+		//[Required]
+		//[StringLength(500, ErrorMessage = "Answer text cannot exceed 300 characters.")]
+		//public string? AnswerText { get; set; }
 
 		[Required]
 		[Range(1, 100)]

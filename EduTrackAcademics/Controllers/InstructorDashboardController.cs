@@ -13,10 +13,12 @@ namespace EduTrackAcademics.Controllers
 	public class InstructorDashboardController : ControllerBase
 	{
 		private readonly IInstructorService _service;
+		private readonly EduTrackAcademicsContext _context;
 
-		public InstructorDashboardController(IInstructorService service)
+		public InstructorDashboardController(EduTrackAcademicsContext context,IInstructorService service)
 		{
 			_service = service;
+			_context =context;
 		}
 
 		// MODULE
@@ -108,9 +110,24 @@ namespace EduTrackAcademics.Controllers
 		public async Task<IActionResult> CreateAssessment(AssessmentDTO dto)
 		=> Ok(await _service.CreateAssessmentAsync(dto));
 
-		[HttpGet("assessment/{id}")]
+		[HttpGet("assessmentDetails/{id}")]
 		public async Task<IActionResult> GetAssessment(string id)
 			=> Ok(await _service.GetAssessmentByIdAsync(id));
+
+		[HttpGet("assessmentQuestions/{id}")]
+		public async Task<IActionResult> GetAllQuestions(string id)
+		{
+			var questions = await _context.Questions
+				.Where(q => q.AssessmentId == id)
+				.ToListAsync();
+
+			if (questions == null || !questions.Any())
+				return NotFound($"No questions found for assessment {id}");
+
+			return Ok(questions);
+		}
+
+
 
 		[HttpGet("assessments/course/{courseId}")]
 		public async Task<IActionResult> GetAssessmentsByCourse(string courseId)
@@ -149,30 +166,56 @@ namespace EduTrackAcademics.Controllers
 		// ATTENDANCE
 
 		[HttpPost("attendance")]
-		public async Task<IActionResult> MarkAttendance(AttendanceDTO dto)
-	=> Ok(await _service.MarkAttendanceAsync(dto));
+		public async Task<IActionResult> MarkAttendance([FromBody] AttendanceDTO dto)
+		{
+			var result = await _service.MarkAttendanceAsync(dto);
+			return Ok(result);
+		}
 
-		[HttpPut("attendance/{id}")]
-		public async Task<IActionResult> UpdateAttendance(string id, bool status)
-			=> Ok(await _service.UpdateAttendanceAsync(id, status));
+		[HttpGet("attendance")]
+		public async Task<IActionResult> GetAllAttendance()
+		{
+			var result = await _service.GetAllAttendanceAsync();
+			return Ok(result);
+		}
 
-		[HttpDelete("attendance/{id}")]
-		public async Task<IActionResult> DeleteAttendance(string id)
-			=> Ok(await _service.DeleteAttendanceAsync(id));
+		[HttpGet("attendance/date/{date}")]
+		public async Task<IActionResult> GetAttendanceByDate(DateTime date)
+		{
+			var result = await _service.GetAttendanceByDateAsync(date);
+			return Ok(result);
+		}
 
 		[HttpGet("attendance/batch/{batchId}")]
-		public async Task<IActionResult> GetByBatch(string batchId)
-			=> Ok(await _service.ViewByBatchAsync(batchId));
-
-		[HttpGet("attendance/date")]
-		public async Task<IActionResult> GetByDate(DateTime date)
-			=> Ok(await _service.ViewByDateAsync(date));
+		public async Task<IActionResult> GetAttendanceByBatch(string batchId)
+		{
+			var result = await _service.GetAttendanceByBatchAsync(batchId);
+			return Ok(result);
+		}
 
 		[HttpGet("attendance/enrollment/{enrollmentId}")]
-		public async Task<IActionResult> GetByEnrollment(string enrollmentId)
-			=> Ok(await _service.ViewByEnrollmentAsync(enrollmentId));
+		public async Task<IActionResult> GetAttendanceByEnrollment(string enrollmentId)
+		{
+			var result = await _service.GetAttendanceByEnrollmentAsync(enrollmentId);
+			return Ok(result);
+		}
 
+		[HttpPut("attendance/{attendanceId}")]
+		public async Task<IActionResult> UpdateAttendance(string attendanceId, [FromBody] AttendanceDTO dto)
+		{
+			var result = await _service.UpdateAttendanceAsync(attendanceId, dto);
+			return Ok(result);
+		}
 
+		[HttpDelete("attendance/{attendanceId}")]
+		public async Task<IActionResult> DeleteAttendance(string attendanceId, [FromQuery] string reason)
+		{
+			var result = await _service.DeleteAttendanceAsync(attendanceId, reason);
+			if (result.Contains("not found"))
+				return NotFound(result);
+
+			return Ok(result);
+		}
 	}
 
 }

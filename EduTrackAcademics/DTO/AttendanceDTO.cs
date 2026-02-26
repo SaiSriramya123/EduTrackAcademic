@@ -6,6 +6,6 @@
 		public string BatchId { get; set; }
 		public DateTime SessionDate { get; set; }
 		public string Mode { get; set; }
-		public bool Status { get; set; }
+		public string Status { get; set; }
 	}
 }

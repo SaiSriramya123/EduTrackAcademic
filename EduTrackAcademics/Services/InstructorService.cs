@@ -87,7 +87,6 @@ namespace EduTrackAcademics.Services
 			};
 
 			await _repo.AddContentAsync(content);
-			await _repo.CommitAsync();
 
 			return $"Content created. ID = {content.ContentID}";
 		}
@@ -117,7 +116,6 @@ namespace EduTrackAcademics.Services
 			content.ContentURI = dto.ContentURI;
 
 			await _repo.UpdateContentAsync(content);
-			await _repo.CommitAsync();
 
 			return "Content updated successfully";
 		}
@@ -134,7 +132,6 @@ namespace EduTrackAcademics.Services
 			content.Status = "Published";
 
 			await _repo.UpdateContentAsync(content);
-			await _repo.CommitAsync();
 
 			return "Content published successfully";
 		}
@@ -146,7 +143,6 @@ namespace EduTrackAcademics.Services
 				throw new ContentNotFoundException(id);
 
 			await _repo.DeleteContentAsync(content);
-			await _repo.CommitAsync();
 
 			return "Content deleted successfully";
 		}
@@ -164,12 +160,13 @@ namespace EduTrackAcademics.Services
 				Type = dto.Type,
 				MaxMarks = dto.MaxMarks,
 				DueDate = dto.DueDate,
-				Status = "Open"
+				Status = dto.DueDate < DateTime.UtcNow ? "Close" : "Open"
 			};
 
 			await _repo.AddAssessmentAsync(assessment);
-			return $"Assessment created with ID {id}";
+			return $"Assessment created with ID {id} and status {assessment.Status}";
 		}
+
 
 		public async Task<Assessment> GetAssessmentByIdAsync(string id)
 		{
@@ -273,64 +270,138 @@ namespace EduTrackAcademics.Services
 
 		public async Task<string> MarkAttendanceAsync(AttendanceDTO dto)
 		{
-			if (await _repo.AttendanceExistsAsync(dto.EnrollmentID, dto.SessionDate))
+			var enrollmentExists = await _repo.EnrollmentExistsAsync(dto.EnrollmentID);
+			if (!enrollmentExists)
+				throw new ApplicationException("Invalid Enrollment ID");
+
+			var batchExists = await _repo.BatchExistsAsync(dto.BatchId);
+			if (!batchExists)
+				throw new ApplicationException("Invalid Batch ID");
+
+			var alreadyMarked = await _repo.AttendanceExistsAsync(dto.EnrollmentID, dto.SessionDate);
+			if (alreadyMarked)
 				throw new ApplicationException("Attendance already marked for this date");
 
-			var id = await _repo.GenerateAttendanceIdAsync();
+			var attendanceId = await _repo.GenerateAttendanceIdAsync();
 
 			var attendance = new Attendance
 			{
-				AttendanceID = id,
+				AttendanceID = attendanceId,
 				EnrollmentID = dto.EnrollmentID,
 				BatchId = dto.BatchId,
 				SessionDate = dto.SessionDate,
 				Mode = dto.Mode,
-				Status = dto.Status
+				Status = dto.Status,
+				IsDeleted = false
 			};
 
 			await _repo.AddAttendanceAsync(attendance);
 
-			return $"Attendance marked successfully with ID {id}";
+			return $"Attendance marked successfully with ID {attendanceId}";
 		}
 
-		public async Task<string> UpdateAttendanceAsync(string id, bool status)
+		public async Task<List<object>> GetAllAttendanceAsync()
 		{
-			var attendance = await _repo.GetAttendanceByIdAsync(id);
+			var attendances = await _repo.GetAllAttendanceAsync();
+
+			return attendances.Select(a => new
+			{
+				a.AttendanceID,
+				a.EnrollmentID,
+				StudentName = a.Enrollment.Student.StudentName,
+				CourseName = a.Enrollment.Course.CourseName,
+				a.BatchId,
+				a.SessionDate,
+				a.Mode,
+				a.Status
+			}).ToList<object>();
+		}
+
+		public async Task<List<object>> GetAttendanceByDateAsync(DateTime date)
+		{
+			var attendances = await _repo.GetAttendanceByDateAsync(date);
+
+			return attendances.Select(a => new
+			{
+				a.AttendanceID,
+				a.EnrollmentID,
+				StudentName = a.Enrollment.Student.StudentName,
+				CourseName = a.Enrollment.Course.CourseName,
+				a.BatchId,
+				a.SessionDate,
+				a.Mode,
+				a.Status
+			}).ToList<object>();
+		}
+
+		public async Task<List<object>> GetAttendanceByBatchAsync(string batchId)
+		{
+			var attendances = await _repo.GetAttendanceByBatchAsync(batchId);
+
+			return attendances.Select(a => new
+			{
+				a.AttendanceID,
+				a.EnrollmentID,
+				StudentName = a.Enrollment.Student.StudentName,
+				CourseName = a.Enrollment.Course.CourseName,
+				a.BatchId,
+				a.SessionDate,
+				a.Mode,
+				a.Status
+			}).ToList<object>();
+		}
+
+		public async Task<List<object>> GetAttendanceByEnrollmentAsync(string enrollmentId)
+		{
+			var attendances = await _repo.GetAttendanceByEnrollmentAsync(enrollmentId);
+
+			return attendances.Select(a => new
+			{
+				a.AttendanceID,
+				a.EnrollmentID,
+				StudentName = a.Enrollment.Student.StudentName,
+				CourseName = a.Enrollment.Course.CourseName,
+				a.BatchId,
+				a.SessionDate,
+				a.Mode,
+				a.Status
+			}).ToList<object>();
+		}
+
+		public async Task<string> UpdateAttendanceAsync(string attendanceId, AttendanceDTO dto)
+		{
+			var attendance = await _repo.GetAttendanceByIdAsync(attendanceId);
 
 			if (attendance == null)
 				throw new ApplicationException("Attendance not found");
 
-			attendance.Status = status;
+			attendance.EnrollmentID = dto.EnrollmentID;
+			attendance.BatchId = dto.BatchId;
+			attendance.SessionDate = dto.SessionDate;
+			attendance.Mode = dto.Mode;
+			attendance.Status = dto.Status;
 			attendance.UpdatedOn = DateTime.Now;
 
 			await _repo.UpdateAttendanceAsync(attendance);
 
-			return "Attendance updated successfully";
+			return $"Attendance {attendanceId} updated successfully";
 		}
 
-		public async Task<string> DeleteAttendanceAsync(string id)
+		public async Task<string> DeleteAttendanceAsync(string attendanceId, string reason)
 		{
-			var attendance = await _repo.GetAttendanceByIdAsync(id);
+			var attendance = await _repo.GetAttendanceByIdAsync(attendanceId);
 
 			if (attendance == null)
-				throw new ApplicationException("Attendance not found");
+				return "Attendance not found or already deleted";
 
 			attendance.IsDeleted = true;
+			attendance.DeletionReason = reason;
 			attendance.DeletionDate = DateTime.Now;
 
-			await _repo.UpdateAttendanceAsync(attendance);
+			await _repo.SoftDeleteAttendanceAsync(attendance);
 
-			return "Attendance deleted successfully";
+			return $"Attendance {attendanceId} deleted successfully";
 		}
-
-		public async Task<List<Attendance>> ViewByBatchAsync(string batchId)
-			=> await _repo.GetAttendanceByBatchAsync(batchId);
-
-		public async Task<List<Attendance>> ViewByDateAsync(DateTime date)
-			=> await _repo.GetAttendanceByDateAsync(date);
-
-		public async Task<List<Attendance>> ViewByEnrollmentAsync(string enrollmentId)
-			=> await _repo.GetAttendanceByEnrollmentAsync(enrollmentId);
 
 	}
 }

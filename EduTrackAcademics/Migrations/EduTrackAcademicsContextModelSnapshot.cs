@@ -97,7 +97,7 @@ namespace EduTrackAcademics.Migrations
 
                     b.Property<string>("EnrollmentID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -109,8 +109,9 @@ namespace EduTrackAcademics.Migrations
                     b.Property<DateTime>("SessionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdateReason")
                         .HasColumnType("nvarchar(max)");
@@ -121,6 +122,8 @@ namespace EduTrackAcademics.Migrations
                     b.HasKey("AttendanceID");
 
                     b.HasIndex("BatchId");
+
+                    b.HasIndex("EnrollmentID");
 
                     b.ToTable("Attendances");
                 });
@@ -498,11 +501,6 @@ namespace EduTrackAcademics.Migrations
                     b.Property<string>("QuestionId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AnswerText")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<string>("AssessmentId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -760,6 +758,14 @@ namespace EduTrackAcademics.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EduTrackAcademics.Model.Enrollment", "Enrollment")
+                        .WithMany("Attendances")
+                        .HasForeignKey("EnrollmentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Enrollment");
+
                     b.Navigation("StudentBatchAssignment");
                 });
 
@@ -959,6 +965,11 @@ namespace EduTrackAcademics.Migrations
             modelBuilder.Entity("EduTrackAcademics.Model.CourseBatch", b =>
                 {
                     b.Navigation("StudentBatchAssignments");
+                });
+
+            modelBuilder.Entity("EduTrackAcademics.Model.Enrollment", b =>
+                {
+                    b.Navigation("Attendances");
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.Module", b =>

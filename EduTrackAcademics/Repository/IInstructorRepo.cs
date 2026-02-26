@@ -39,16 +39,18 @@ namespace EduTrackAcademics.Repository
 		Task DeleteQuestionAsync(Question question);
 
 		// ATTENDANCE
-		Task<string> GenerateAttendanceIdAsync();
+		Task<bool> EnrollmentExistsAsync(string enrollmentId);
+		Task<bool> BatchExistsAsync(string batchId);
 		Task<bool> AttendanceExistsAsync(string enrollmentId, DateTime date);
+		Task<string> GenerateAttendanceIdAsync();
 		Task AddAttendanceAsync(Attendance attendance);
-		Task UpdateAttendanceAsync(Attendance attendance);
-		Task<Attendance?> GetAttendanceByIdAsync(string attendanceId);
-		Task<List<Attendance>> GetAttendanceByBatchAsync(string batchId);
+		Task<List<Attendance>> GetAllAttendanceAsync();
 		Task<List<Attendance>> GetAttendanceByDateAsync(DateTime date);
+		Task<List<Attendance>>GetAttendanceByBatchAsync(string batchId);
 		Task<List<Attendance>> GetAttendanceByEnrollmentAsync(string enrollmentId);
-
-		Task CommitAsync();
+		Task<Attendance> GetAttendanceByIdAsync(string attendanceId);
+		Task UpdateAttendanceAsync(Attendance attendance);
+		Task SoftDeleteAttendanceAsync(Attendance attendance);
 
 	}
 }

@@ -78,6 +78,7 @@ namespace EduTrackAcademics.Repository
 		public async Task AddContentAsync(Content content)
 		{
 			await _context.Contents.AddAsync(content);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task<Content> GetContentByIdAsync(string contentId)
@@ -95,11 +96,13 @@ namespace EduTrackAcademics.Repository
 		public async Task UpdateContentAsync(Content content)
 		{
 			_context.Contents.Update(content);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task DeleteContentAsync(Content content)
 		{
 			_context.Contents.Remove(content);
+			await _context.SaveChangesAsync();
 		}
 
 		// ASSESSMENT
@@ -113,6 +116,7 @@ namespace EduTrackAcademics.Repository
 
 			int next = last == null ? 1 : int.Parse(last.Substring(1)) + 1;
 			return $"A{next:000}";
+
 		}
 
 		public async Task AddAssessmentAsync(Assessment assessment)
@@ -120,7 +124,7 @@ namespace EduTrackAcademics.Repository
 			await _context.Assessments.AddAsync(assessment);
 			await _context.SaveChangesAsync();
 		}
-
+		  
 		public async Task<Assessment?> GetAssessmentByIdAsync(string id)
 			=> await _context.Assessments.FindAsync(id);
 
@@ -132,11 +136,14 @@ namespace EduTrackAcademics.Repository
 		public async Task UpdateAssessmentAsync(Assessment assessment)
 		{
 			_context.Assessments.Update(assessment);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task DeleteAssessmentAsync(Assessment assessment)
 		{
 			_context.Assessments.Remove(assessment);
+			await _context.SaveChangesAsync();
+
 		}
 
 		// QUESTIONS
@@ -158,7 +165,9 @@ namespace EduTrackAcademics.Repository
 		public async Task AddQuestionAsync(Question question)
 		{
 			await _context.Questions.AddAsync(question);
+			await _context.SaveChangesAsync(); // <-- critical
 		}
+
 
 		public async Task<Question?> GetQuestionByIdAsync(string id)
 			=> await _context.Questions.FindAsync(id);
@@ -171,61 +180,65 @@ namespace EduTrackAcademics.Repository
 		public async Task UpdateQuestionAsync(Question question)
 		{
 			_context.Questions.Update(question);
+			await _context.SaveChangesAsync();
 		}
 
 		public async Task DeleteQuestionAsync(Question question)
 		{
 			_context.Questions.Remove(question);
+			await _context.SaveChangesAsync();
 		}
 
 		// ATTENDANCE
+
+		public async Task<bool> EnrollmentExistsAsync(string enrollmentId)
+		{
+			return await _context.Enrollment
+				.AnyAsync(e => e.EnrollmentId == enrollmentId);
+		}
+
+		public async Task<bool> BatchExistsAsync(string batchId)
+		{
+			return await _context.CourseBatches
+				.AnyAsync(b => b.BatchId == batchId);
+		}
+
+		public async Task<bool> AttendanceExistsAsync(string enrollmentId, DateTime date)
+		{
+			return await _context.Attendances
+				.AnyAsync(a =>
+					a.EnrollmentID == enrollmentId &&
+					a.SessionDate.Date == date.Date &&
+					!a.IsDeleted);
+		}
 
 		public async Task<string> GenerateAttendanceIdAsync()
 		{
 			var last = await _context.Attendances
 				.OrderByDescending(a => a.AttendanceID)
-				.Select(a => a.AttendanceID)
 				.FirstOrDefaultAsync();
 
-			int next = last == null ? 1 : int.Parse(last.Substring(2)) + 1;
+			if (last == null)
+				return "A001";
 
-			return $"AT{next:000}";
-		}
-
-		public async Task<bool> AttendanceExistsAsync(string enrollmentId, DateTime date)
-		{
-			return await _context.Attendances.AnyAsync(a =>
-				a.EnrollmentID == enrollmentId &&
-				a.SessionDate.Date == date.Date &&
-				!a.IsDeleted);
+			int number = int.Parse(last.AttendanceID.Substring(1));
+			return $"A{(number + 1).ToString("D3")}";
 		}
 
 		public async Task AddAttendanceAsync(Attendance attendance)
 		{
-			await _context.Attendances.AddAsync(attendance);
+			_context.Attendances.Add(attendance);
+			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateAttendanceAsync(Attendance attendance)
-		{
-			_context.Attendances.Update(attendance);
-		}
-
-		public async Task<Attendance?> GetAttendanceByIdAsync(string id)
+		public async Task<List<Attendance>> GetAllAttendanceAsync()
 		{
 			return await _context.Attendances
 				.Include(a => a.Enrollment)
-				.Include(a => a.StudentBatchAssignment)
-				.ThenInclude(b => b.Batches)
-				.FirstOrDefaultAsync(a => a.AttendanceID == id);
-		}
-
-		public async Task<List<Attendance>> GetAttendanceByBatchAsync(string batchId)
-		{
-			return await _context.Attendances
+					.ThenInclude(e => e.Student)
 				.Include(a => a.Enrollment)
-				.Include(a => a.StudentBatchAssignment)
-					.ThenInclude(b => b.Batches)
-				.Where(a => a.BatchId == batchId && !a.IsDeleted)
+					.ThenInclude(e => e.Course)
+				.Where(a => !a.IsDeleted)
 				.ToListAsync();
 		}
 
@@ -233,23 +246,50 @@ namespace EduTrackAcademics.Repository
 		{
 			return await _context.Attendances
 				.Include(a => a.Enrollment)
-				.Include(a => a.StudentBatchAssignment)
-					.ThenInclude(b => b.Batches)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
 				.Where(a => a.SessionDate.Date == date.Date && !a.IsDeleted)
+				.ToListAsync();
+		}
+
+		public async Task<List<Attendance>> GetAttendanceByBatchAsync(string batchId)
+		{
+			return await _context.Attendances
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
+				.Where(a => a.BatchId == batchId && !a.IsDeleted)
 				.ToListAsync();
 		}
 
 		public async Task<List<Attendance>> GetAttendanceByEnrollmentAsync(string enrollmentId)
 		{
 			return await _context.Attendances
-				.Include(a => a.StudentBatchAssignment)
-					.ThenInclude(b => b.Batches)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
 				.Where(a => a.EnrollmentID == enrollmentId && !a.IsDeleted)
 				.ToListAsync();
 		}
 
-		public async Task CommitAsync()
+		public async Task<Attendance> GetAttendanceByIdAsync(string attendanceId)
 		{
+			return await _context.Attendances
+				.FirstOrDefaultAsync(a => a.AttendanceID == attendanceId && !a.IsDeleted);
+		}
+
+		public async Task UpdateAttendanceAsync(Attendance attendance)
+		{
+			_context.Attendances.Update(attendance);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task SoftDeleteAttendanceAsync(Attendance attendance)
+		{
+			_context.Attendances.Update(attendance);
 			await _context.SaveChangesAsync();
 		}
 

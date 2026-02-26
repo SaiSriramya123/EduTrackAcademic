@@ -34,10 +34,11 @@ namespace EduTrackAcademics.Services
 
 		// ATTENDANCE
 		Task<string> MarkAttendanceAsync(AttendanceDTO dto);
-		Task<string> UpdateAttendanceAsync(string attendanceId, bool status);
-		Task<string> DeleteAttendanceAsync(string attendanceId);
-		Task<List<Attendance>> ViewByBatchAsync(string batchId);
-		Task<List<Attendance>> ViewByDateAsync(DateTime date);
-		Task<List<Attendance>> ViewByEnrollmentAsync(string enrollmentId);
+		Task<List<object>> GetAllAttendanceAsync();
+		Task<List<object>> GetAttendanceByDateAsync(DateTime date);
+		Task<List<object>>GetAttendanceByBatchAsync(string batchId);
+		Task<List<object>>GetAttendanceByEnrollmentAsync(string enrollmentId);
+		Task<string>UpdateAttendanceAsync(string attendanceId, AttendanceDTO dto);
+		Task<string> DeleteAttendanceAsync(string attendanceId, string reason);
 	}
 }
