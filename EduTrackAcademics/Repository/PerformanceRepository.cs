@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EduTrackAcademics.Data;
+﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.DTO;
 using EduTrackAcademics.Dummy;
 using EduTrackAcademics.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EduTrackAcademics.Repository
 {
@@ -37,19 +38,64 @@ namespace EduTrackAcademics.Repository
                      select p.LastUpdated).FirstOrDefault();
 
          }*/
+
+        //method fro getbatchperformance
+
+        public List<BatchPerformanceDTO> GetBatchPerformance(string batchId)
+
+        {
+
+            var result =
+
+                (from sba in _context.StudentBatchAssignments
+
+                 join s in _context.Student
+
+                    on sba.StudentId equals s.StudentId
+
+                 join e in _context.Enrollment
+
+                    on s.StudentId equals e.StudentId
+
+                 join c in _context.Course
+
+                    on e.CourseId equals c.CourseId
+
+                 where sba.BatchId == batchId
+
+                 select new BatchPerformanceDTO
+
+                 {
+
+                     StudentId = s.StudentId,
+
+                     StudentName = s.StudentName,
+
+                     CourseName = c.CourseName,
+
+                     AvgScore = _context.Submissions
+
+                        .Where(sub => sub.StudentID == s.StudentId)
+
+                        .Select(sub => (decimal?)sub.Score)
+
+                        .Average() ?? 0
+
+                 }).ToList();
+
+            return result;
+
+        }
+
         //method for AvgScore
-        public decimal GetAverageScore(int enrollmentId)
-{
-   var avgScore =
-       (from e in _context.Enrollments
-        join s in _context.Students on e.StudentId equals s.StudentId
-        join c in _context.Courses on e.CourseId equals c.CourseId
-        join a in _context.Assessments on c.CourseId equals a.CourseID
-        where e.EnrollmentId == enrollmentId
-        select a.MarksObtained
-       ).Average();
-   return avgScore;
-}
+        public decimal GetAverageScore(string studentId)
+        {
+            var avgScore = _context.Submissions
+                .Where(s => s.StudentID == studentId)
+                .Select(s => (decimal?)s.Score)
+                .Average() ?? 0;
+            return avgScore;
+        }
 
 
         //method for BatchPerformance

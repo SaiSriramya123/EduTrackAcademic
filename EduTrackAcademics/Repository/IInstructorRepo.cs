@@ -8,9 +8,9 @@ namespace EduTrackAcademics.Repository
 		Task<object> GetStudents(string batchId);
 		Task<object> GetDashboard(string instructorId);
 
-		Task AddModule(Module module);
-		Task UpdateModule(Module module);
-		Task DeleteModule(string id);
+		Task AddModuleAsync(Module module);
+		Task UpdateModuleAsync(string id, Module module);
+		Task DeleteModuleAsync(string id);
 		Task<object> GetModules(string courseId);
 		Task<bool> CompleteModule(string moduleId);
 

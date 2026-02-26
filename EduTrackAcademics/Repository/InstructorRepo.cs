@@ -72,23 +72,31 @@ namespace EduTrackAcademics.Repository
 			return dashboard;
 		}
 
-		public async Task AddModule(Module module)
+		public async Task AddModuleAsync(Module module)
 		{
-			_context.Modules.Add(module);
+			await _context.Modules.AddAsync(module);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateModule(Module module)
+		public async Task UpdateModuleAsync(string id, Module module)
 		{
-			_context.Modules.Update(module);
+			var existing = await _context.Modules.FindAsync(id);
+
+			if (existing == null)
+				throw new KeyNotFoundException("Module not found");
+
+			existing.Name = module.Name;
+			existing.SequenceOrder = module.SequenceOrder;
+			existing.LearningObjectives = module.LearningObjectives;
+
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task DeleteModule(string id)
+		public async Task DeleteModuleAsync(string id)
 		{
 			var module = await _context.Modules.FindAsync(id);
-			if (module == null) 
-				return;
+			if (module == null)
+				throw new KeyNotFoundException("Module not found");
 			_context.Modules.Remove(module);
 			await _context.SaveChangesAsync();
 		}

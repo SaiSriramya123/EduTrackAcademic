@@ -22,7 +22,7 @@ namespace EduTrackAcademics.Controllers
         }
 
         [HttpGet("average/{enrollmentId}")]
-        public IActionResult GetAverageScore(int enrollmentId)
+        public IActionResult GetAverageScore(string enrollmentId)
         {
             var result= _service.GetAverageScore(enrollmentId);
             return Ok(result);

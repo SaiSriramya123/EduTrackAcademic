@@ -4,7 +4,7 @@ namespace EduTrackAcademics.Services
 {
     public interface IPerformanceService
     {
-        decimal GetAverageScore(int enrollmentId);
+        decimal GetAverageScore(string studentId);
         decimal GetCompletionPercentage(int enrollmentId);
         DateTime GetLastModifiedDate(int enrollmentId);
         List<CourseBatch> GetInstructorBatches(string instructorId);

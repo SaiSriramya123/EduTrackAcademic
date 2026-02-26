@@ -34,11 +34,16 @@ namespace EduTrackAcademics.Data
 		public DbSet<CourseBatch> CourseBatches { get; set; }
 		public DbSet<Notification> Notification{ get; set; }
 		public DbSet<StudentBatchAssignment> StudentBatchAssignments { get; set; }
+<<<<<<< HEAD
 		
 		public DbSet<StudentLoginHistory>StudentLoginHistories { get; set; }
 		public DbSet<Performance>Performances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
+=======
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+>>>>>>> 60f6f5c889e1b077c3e5d0b312ad007a2dbce71e
 		{
 			modelBuilder.Entity<Qualification>()
 				.HasMany(q => q.Programs)

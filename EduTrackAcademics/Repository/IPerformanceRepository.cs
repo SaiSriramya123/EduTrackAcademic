@@ -5,7 +5,7 @@ namespace EduTrackAcademics.Repository
     public interface IPerformanceRepository
     {
         decimal GetCompletionPercentage(int enrollmentId);
-        decimal GetAverageScore(int enrollmentId);
+        decimal GetAverageScore(string studentId);
         DateTime GetLastModifiedDate(int enrollmentId);
         List<CourseBatch> GetInstructorBatches(string  instructorId);
         List<StudentBatchAssignment> GetBatchPerformance(string  batchId);

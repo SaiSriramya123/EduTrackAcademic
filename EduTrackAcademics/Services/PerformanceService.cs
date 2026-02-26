@@ -12,9 +12,9 @@ namespace EduTrackAcademics.Services
             {
                 _repo = repo;
             }
-            public decimal GetAverageScore(int enrollmentId)
+            public decimal GetAverageScore(string studentId)
             {
-                return _repo.GetAverageScore(enrollmentId);
+                return _repo.GetAverageScore(studentId);
             }
 
             public decimal GetCompletionPercentage(int enrollmentId)
