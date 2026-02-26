@@ -28,6 +28,6 @@ namespace EduTrackAcademics.Model
 		public TimeSpan? Duration { get; set; }
 		[Required]
 		[RegularExpression(@"^(Draft|Published)$", ErrorMessage = "Status must be Draft or Published.")]
-		public string Status { get; set; }
+		public string Status { get; set; } = "Draft";
 	}
 }

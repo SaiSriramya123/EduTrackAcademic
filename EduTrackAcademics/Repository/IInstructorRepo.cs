@@ -4,33 +4,51 @@ namespace EduTrackAcademics.Repository
 {
 	public interface IInstructorRepo
 	{
-		Task<object> GetBatches(string instructorId);
-		Task<object> GetStudents(string batchId);
-		Task<object> GetDashboard(string instructorId);
 
+		// Module
+		Task<string> GenerateModuleIdAsync();
 		Task AddModuleAsync(Module module);
-		Task UpdateModuleAsync(string id, Module module);
-		Task DeleteModuleAsync(string id);
-		Task<object> GetModules(string courseId);
-		Task<bool> CompleteModule(string moduleId);
+		Task<List<Module>> GetModulesByCourseAsync(string courseId);
+		Task<Module> GetModuleByIdAsync(string moduleId);
+		Task UpdateModuleAsync(Module module);
 
-		Task AddContent(Content content);
-		Task UpdateContent(Content content);
-		Task DeleteContent(string id);
-		Task<object> GetContent(string moduleId);
+		// Content
+		Task<string> GenerateContentIdAsync();
+		Task<bool> ModuleExistsAsync(string moduleId);
+		Task AddContentAsync(Content content);
+		Task<Content> GetContentByIdAsync(string contentId);
+		Task<List<Content>> GetContentByModuleAsync(string moduleId);
+		Task UpdateContentAsync(Content content);
+		Task DeleteContentAsync(Content content);
 
-		Task AddAssessment(Assessment a);
-		Task UpdateAssessment(Assessment a);
-		Task DeleteAssessment(string id);
-		Task<object> GetAssessments(string courseId);
-		Task<object> GetQuestions(string assessmentId);
-		Task EvaluateAssessment(string id, int marks, string feedback);
+		// ASSESSMENT
+		Task<string> GenerateAssessmentIdAsync();
+		Task AddAssessmentAsync(Assessment assessment);
+		Task<Assessment?> GetAssessmentByIdAsync(string assessmentId);
+		Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId);
+		Task UpdateAssessmentAsync(Assessment assessment);
+		Task DeleteAssessmentAsync(Assessment assessment);
 
-		Task MarkAttendance(Attendance attendance);
-		Task UpdateAttendance(string id, Attendance updated);
-		Task DeleteAttendance(string id, string reason);
-		Task<object> GetAttendance(string batchId);
-		Task<object> GetAttendanceReport(string batchId);
-		Task<object> GetIrregularStudents(string batchId);
+		// QUESTIONS
+		Task<string> GenerateQuestionIdAsync();
+		Task<bool> QuestionExistsAsync(string questionId);
+		Task AddQuestionAsync(Question question);
+		Task<Question?> GetQuestionByIdAsync(string questionId);
+		Task<List<Question>> GetQuestionsByAssessmentAsync(string assessmentId);
+		Task UpdateQuestionAsync(Question question);
+		Task DeleteQuestionAsync(Question question);
+
+		// ATTENDANCE
+		Task<string> GenerateAttendanceIdAsync();
+		Task<bool> AttendanceExistsAsync(string enrollmentId, DateTime date);
+		Task AddAttendanceAsync(Attendance attendance);
+		Task UpdateAttendanceAsync(Attendance attendance);
+		Task<Attendance?> GetAttendanceByIdAsync(string attendanceId);
+		Task<List<Attendance>> GetAttendanceByBatchAsync(string batchId);
+		Task<List<Attendance>> GetAttendanceByDateAsync(DateTime date);
+		Task<List<Attendance>> GetAttendanceByEnrollmentAsync(string enrollmentId);
+
+		Task CommitAsync();
+
 	}
 }

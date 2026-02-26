@@ -19,5 +19,6 @@ namespace EduTrackAcademics.Model
 		public int CurrentStudents { get; set; } = 0;
 
 		public bool IsActive { get; set; } = true;
+		public ICollection<StudentBatchAssignment> StudentBatchAssignments { get; set; }
 	}
 }
