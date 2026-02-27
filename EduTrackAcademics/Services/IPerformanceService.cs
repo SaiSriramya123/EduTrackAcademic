@@ -1,13 +1,15 @@
-﻿using EduTrackAcademics.Model;
+﻿using EduTrackAcademics.DTO;
+using EduTrackAcademics.Model;
 using System.Collections.Generic;   
 namespace EduTrackAcademics.Services
 {
     public interface IPerformanceService
     {
         decimal GetAverageScore(string studentId);
-        decimal GetCompletionPercentage(int enrollmentId);
-        DateTime GetLastModifiedDate(int enrollmentId);
-        List<CourseBatch> GetInstructorBatches(string instructorId);
-        List<Performance> GetBatchPerformance(int batchId);
+       
+        BatchPerformanceDTO GetLastModifiedDate(string enrollmentId);
+        List < InstructorBatchDTO >GetInstructorBatches(string instructorId);
+        List<BatchPerformanceDTO> GetBatchPerformance(string batchId);
+        
     }
 }

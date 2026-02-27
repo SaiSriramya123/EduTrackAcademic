@@ -1,10 +1,12 @@
 ﻿namespace EduTrackAcademics.Exception
 {
-	public class StudentNotFoundException : ApplicationException
-	{
-		public StudentNotFoundException(string id)
-	   : base($"Student {id} not found")
-		{
-		}
-	}
+    public class StudentNotFoundException : ApplicationException
+    {
+        public int StatusCode { get; }
+        public StudentNotFoundException(string message, int statusCode = 404)
+   : base(message)
+        {
+            StatusCode = statusCode;
+        }
+    }
 }

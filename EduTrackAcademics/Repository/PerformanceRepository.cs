@@ -1,7 +1,9 @@
 ﻿using EduTrackAcademics.Data;
 using EduTrackAcademics.DTO;
 using EduTrackAcademics.Dummy;
+using EduTrackAcademics.Exception;
 using EduTrackAcademics.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,136 +18,178 @@ namespace EduTrackAcademics.Repository
             _context = context;
         }
 
-        // private readonly DummyPerformance _dummy = new();
 
-        /* public decimal GetCompletionPercentage(int enrollmentId)
-         {
-             return (from p in _dummy.Performances
-                     where p.EnrollmentId == enrollmentId
-                     select p.CompletionPercentage).FirstOrDefault();
-
-         }
-         public decimal GetAverageScore(int enrollmentId)
-         {
-             return (from p in _dummy.Performances
-                     where p.EnrollmentId == enrollmentId
-                     select p.AvgScore).FirstOrDefault();
-         }
-         public DateTime GetLastModifiedDate(int enrollmentId)
-         {
-             return (from p in _dummy.Performances
-                     where p.EnrollmentId == enrollmentId
-                     select p.LastUpdated).FirstOrDefault();
-
-         }*/
-
-        //method fro getbatchperformance
-
+        //method for getbatchperformance
         public List<BatchPerformanceDTO> GetBatchPerformance(string batchId)
 
         {
 
-            var result =
+            var students = (from sba in _context.StudentBatchAssignments
 
-                (from sba in _context.StudentBatchAssignments
+                            join s in _context.Student on sba.StudentId equals s.StudentId
 
-                 join s in _context.Student
+                            join cb in _context.CourseBatches on sba.BatchId equals cb.BatchId
 
-                    on sba.StudentId equals s.StudentId
+                            join c in _context.Course on cb.CourseId equals c.CourseId
 
-                 join e in _context.Enrollment
+                            where cb.BatchId == batchId
 
-                    on s.StudentId equals e.StudentId
+                            select new
 
-                 join c in _context.Course
+                            {
 
-                    on e.CourseId equals c.CourseId
+                                s.StudentId,
 
-                 where sba.BatchId == batchId
+                                s.StudentName,
 
-                 select new BatchPerformanceDTO
+                                c.CourseName
 
-                 {
+                            }).ToList();
 
-                     StudentId = s.StudentId,
+            var result = new List<BatchPerformanceDTO>();
 
-                     StudentName = s.StudentName,
+            foreach (var student in students)
 
-                     CourseName = c.CourseName,
+            {
 
-                     AvgScore = _context.Submissions
+                // 🔹 Latest Marks
 
-                        .Where(sub => sub.StudentID == s.StudentId)
+                var latestMarks = (from sub in _context.Submissions
 
-                        .Select(sub => (decimal?)sub.Score)
+                                   where sub.StudentID == student.StudentId
 
-                        .Average() ?? 0
+                                   orderby sub.SubmissionDate descending
 
-                 }).ToList();
+                                   select sub.Score).FirstOrDefault();
+
+                // 🔹 Average Score
+
+                var avgScore = (from sub in _context.Submissions
+
+                                where sub.StudentID == student.StudentId
+
+                                select (decimal?)sub.Score).Average() ?? 0;
+
+                // 🔹 Get Performance row
+
+                var performance = (from p in _context.Performances
+
+                                   where p.StudentId == student.StudentId
+
+                                   select p).FirstOrDefault();
+
+                if (performance != null)
+
+                {
+
+                    performance.AvgScore = avgScore;
+
+                    performance.LastUpdated = DateTime.Now;
+
+                }
+
+                result.Add(new BatchPerformanceDTO
+
+                {
+
+                    StudentId = student.StudentId,
+
+                    StudentName = student.StudentName,
+
+                    CourseName = student.CourseName,
+
+                    Marks = latestMarks,
+
+                    AvgScore = avgScore
+
+                });
+
+            }
+
+            _context.SaveChanges();
 
             return result;
 
         }
+
 
         //method for AvgScore
         public decimal GetAverageScore(string studentId)
         {
-            var avgScore = _context.Submissions
-                .Where(s => s.StudentID == studentId)
-                .Select(s => (decimal?)s.Score)
-                .Average() ?? 0;
+            //  Calculate Average Score
+            var avgScore = (from s in _context.Submission
+                            where s.StudentID == studentId
+                            select (decimal?)s.Score).Average() ?? 0;
+            //  Get Performance record
+            var performance = (from p in _context.Performances
+                               where p.StudentId == studentId
+                               select p).FirstOrDefault();
+            if (performance == null)
+                throw new StudentNotFoundException("Performance record not found", 404);
+            //  Update AvgScore column
+            performance.AvgScore = avgScore;
+            //  Save changes
+            _context.SaveChanges();
             return avgScore;
         }
 
 
-        //method for BatchPerformance
-        public List<StudentBatchAssignment> GetBatchPerformance(string batchId)
-        {
-            return _context.StudentBatchAssignments
-                           .Where(sba => sba.BatchId == batchId)
-                           .ToList();
-        }
-
         //method for LastModifiedDate
-        public DateTime GetLastModifiedDate(int enrollmentId)
+        public BatchPerformanceDTO GetLastModifiedDate(string enrollmentId)
         {
-            
-            var studentId = _context.Performances
-                .Where(p => p.EnrollmentId == enrollmentId)
-                .Select(p => p.StudentId)
-                .FirstOrDefault();
-           
-            if (studentId == null)
-                return default(DateTime);
-            
-            var lastLogin = _context.StudentLoginHistories
-                .Where(s => s.StudentId == studentId)
-                .OrderByDescending(s => s.LoginTime)
-                .Select(s => s.LoginTime)
-                .FirstOrDefault();
-            return lastLogin;
+            var data = (from p in _context.Performances
+                        join s in _context.Student on p.StudentId equals s.StudentId
+                        join b in _context.CourseBatches on p.BatchId equals b.BatchId
+                        join c in _context.Course on b.CourseId equals c.CourseId
+                        where p.EnrollmentId == enrollmentId
+                        select new
+                        {
+                            Performance = p,
+                            StudentName = s.StudentName,
+                            CourseName = c.CourseName
+                        }).FirstOrDefault();
+            if (data == null)
+                throw new EnrollmentNotExistsException("Enrollment not found", 404);
+            var lastLogin = (from sl in _context.StudentLoginHistories
+                             where sl.StudentId == data.Performance.StudentId
+                             orderby sl.LoginTime descending
+                             select sl.LoginTime).FirstOrDefault();
+            if (lastLogin == default(DateTime))
+                throw new StudentNotFoundException("No login history found", 404);
+
+            //  Update Performance Table
+            data.Performance.LastUpdated = lastLogin;
+            _context.SaveChanges();
+            return new BatchPerformanceDTO
+            {
+                StudentName = data.StudentName,
+                CourseName = data.CourseName,
+                LastUpdated = lastLogin
+            };
         }
 
+        //method for getting Instructor Batches
 
-
-        public List<CourseBatch> GetInstructorBatches(string instructorId)
+        public List<InstructorBatchDTO> GetInstructorBatches(string instructorId)
         {
-            var result =
-                (from cb in _context.CourseBatches where cb.InstructorId==instructorId
-                 select cb).ToList();
+            var result = (from b in _context.CourseBatches
+                          join c in _context.Course
+                          on b.CourseId equals c.CourseId
+                          where b.InstructorId == instructorId
+                          select new InstructorBatchDTO
+                          {
+                              BatchId = b.BatchId,
+                              InstructorId = b.InstructorId,
+                              CourseName = c.CourseName
+                          }).ToList();
+            if (result.Count == 0)
+                throw new InstructorBatchesNotFoundException("No batches found", 404);
             return result;
         }
-       /* public List<Performance> GetBatchPerformance(int batchId)
-        {
-            var result =
-                (from p in _dummy.Performances
-                 where p.BatchId == batchId
-                 select p)
-                 .ToList();
-            return result;*/
 
 
-        }
+
+    }
     }
 
 

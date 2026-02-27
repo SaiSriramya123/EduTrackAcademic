@@ -59,6 +59,9 @@ builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>(
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 
+builder.Services.AddScoped<IAcademicReportRepository, AcademicReportRepository>();
+builder.Services.AddScoped<IAcademicReportService, AcademicReportService>();
+
 
 // =======================
 // CORS

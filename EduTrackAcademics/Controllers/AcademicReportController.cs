@@ -1,44 +1,57 @@
 ﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.Exception;
+using EduTrackAcademics.Services;
 using Microsoft.AspNetCore.Mvc;
-
 [ApiController]
+
 [Route("api/[controller]")]
+
 public class AcademicReportController : ControllerBase
+
 {
-    private readonly EduTrackAcademicsContext _context;
 
-    public AcademicReportController(EduTrackAcademicsContext context)
+    private readonly IAcademicReportService _service;
+
+    public AcademicReportController(IAcademicReportService service)
+
     {
-        _context = context;
+
+        _service = service;
+
     }
 
-    // ===============================
-    // GET ALL BATCHES WITH STUDENTS
-    // ===============================
-    [HttpGet("batches")]
-    public IActionResult GetBatchesWithStudents()
+    [HttpGet("get-single-report/{batchId}")]
+
+    public IActionResult GetSingleReport(string batchId)
+
     {
-        var data = _context.CourseBatches
-            .Select(b => new
-            {
-                b.BatchId,
-                b.CourseId,
-                b.MaxStudents,
-                b.CurrentStudents,
-            
 
-                Students = _context.StudentBatchAssignments
-                    .Where(sba => sba.BatchId == b.BatchId)
-                    .Select(sba => new
-                    {
-                        sba.Student.StudentId,
-                        sba.Student.StudentName,
-                        sba.Student.StudentEmail
-                    })
-                    .ToList()
-            })
-            .ToList();
+        try
 
-        return Ok(data);
+        {
+
+            var result = _service.GetSingleReport(batchId);
+
+            return Ok(result);
+
+        }
+
+        catch (BatchNotFoundException ex)
+
+        {
+
+            return NotFound(ex.Message);
+
+        }
+
+        catch (NoStudentsFoundException ex)
+
+        {
+
+            return NotFound(ex.Message);
+
+        }
+
     }
+
 }
