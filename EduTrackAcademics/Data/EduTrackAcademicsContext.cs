@@ -69,8 +69,9 @@ namespace EduTrackAcademics.Data
 		public DbSet<EduTrackAcademics.Model.Submission> Submission { get; set; } = default!;
 		public DbSet<EduTrackAcademics.Model.StudentAnswer> StudentAnswer { get; set; } = default!;
 		public DbSet<EduTrackAcademics.Model.AcademicReport> AcademicReport { get; set; }
-		
+		public DbSet<AcademicRule> AcademicRules { get; set; }
 
-		}
+
+	}
 	}
 

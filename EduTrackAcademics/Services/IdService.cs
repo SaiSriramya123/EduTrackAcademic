@@ -17,6 +17,11 @@ namespace EduTrackAcademics.Services
 			int count = _context.Student.Count();
 			return $"S{(count + 1):D3}";
 		}
+		public string GenerateRuleId()
+		{
+			int count = _context.Student.Count();
+			return $"R{(count + 1):D3}";
+		}
 
 		// INSTRUCTOR ID → I001
 		public string GenerateInstructorId()

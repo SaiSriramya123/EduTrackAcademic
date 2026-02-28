@@ -9,7 +9,7 @@ namespace EduTrackAcademics.Repository
         EnrollmentAverageScoreDTO GetAverageScore(string studentId);
         BatchPerformanceDTO GetLastModifiedDate(string enrollmentId);
         List<InstructorBatchDTO>GetInstructorBatches(string  instructorId);
-        List<BatchPerformanceDTO> GetBatchPerformance(string  batchId);
+		BatchAveragePerformanceDTO GetBatchPerformance(string  batchId);
        
 
     }

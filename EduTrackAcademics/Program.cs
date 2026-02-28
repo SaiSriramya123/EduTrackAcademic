@@ -56,6 +56,8 @@ builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 
 builder.Services.AddScoped<IAcademicReportRepository, AcademicReportRepository>();
 builder.Services.AddScoped<IAcademicReportService, AcademicReportService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 

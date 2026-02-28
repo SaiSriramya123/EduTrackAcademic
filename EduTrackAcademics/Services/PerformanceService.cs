@@ -35,7 +35,7 @@ namespace EduTrackAcademics.Services
             return _repo.GetInstructorBatches(instructorId);
         }
 
-        public List<BatchPerformanceDTO> GetBatchPerformance(string batchId)
+        public BatchAveragePerformanceDTO GetBatchPerformance(string batchId)
         {
             return _repo.GetBatchPerformance(batchId);
         }
