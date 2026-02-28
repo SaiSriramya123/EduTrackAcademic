@@ -114,24 +114,46 @@ namespace EduTrackAcademics.Repository
 
 
         //method for AvgScore
-        public decimal GetAverageScore(string studentId)
+        public EnrollmentAverageScoreDTO GetAverageScore(string enrollmentId)
         {
-            //  Calculate Average Score
-            var avgScore = (from s in _context.Submission
-                            where s.StudentID == studentId
-                            select (decimal?)s.Score).Average() ?? 0;
-            //  Get Performance record
-            var performance = (from p in _context.Performances
-                               where p.StudentId == studentId
-                               select p).FirstOrDefault();
-            if (performance == null)
-                throw new StudentNotFoundException("Performance record not found", 404);
-            //  Update AvgScore column
-            performance.AvgScore = avgScore;
-            //  Save changes
-            _context.SaveChanges();
-            return avgScore;
-        }
+			//  Calculate Average Score
+			var enrollment = _context.Enrollment
+                .Include(e=>e.Student)
+                .Include(e=>e.Course)
+		 .Where(e => e.EnrollmentId == enrollmentId)
+		 .Select(e => new
+		 {
+			 e.StudentId,
+			 StudentName = e.Student.StudentName,
+			 e.CourseId,
+			 CourseName = e.Course.CourseName
+		 })
+		 .FirstOrDefault();
+
+			if (enrollment == null)
+				throw new ApplicationException("Enrollment not found");
+
+			// 2️⃣ Get Assessment IDs for that Course
+			var assessmentIds = _context.Assessments
+				.Where(a => a.CourseID == enrollment.CourseId)
+				.Select(a => a.AssessmentID)
+				.ToList();
+
+			// 3️⃣ Calculate Average Score
+			var averageScore = _context.Submissions
+				.Where(s => s.StudentID == enrollment.StudentId
+							&& assessmentIds.Contains(s.AssessmentId))
+				.Select(s => (decimal?)s.Score)
+				.Average() ?? 0;
+
+			// 4️⃣ Return result
+			return new EnrollmentAverageScoreDTO
+			{
+				StudentName = enrollment.StudentName,
+				CourseName = enrollment.CourseName,
+				AverageScore = averageScore
+			};
+		}
 
 
         //method for LastModifiedDate

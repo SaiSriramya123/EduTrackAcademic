@@ -107,7 +107,7 @@ namespace EduTrackAcademics.Controllers
 		// ASSESSMENT
 
 		[HttpPost("assessment")]
-		public async Task<IActionResult> CreateAssessment(AssessmentDTO dto)
+		public async Task<IActionResult> CreateAssessment([FromBody] AssessmentDTO dto)
 		=> Ok(await _service.CreateAssessmentAsync(dto));
 
 		[HttpGet("assessmentDetails/{id}")]
