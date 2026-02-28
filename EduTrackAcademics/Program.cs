@@ -54,6 +54,9 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 
+builder.Services.AddScoped<IAcademicReportRepository, AcademicReportRepository>();
+builder.Services.AddScoped<IAcademicReportService, AcademicReportService>();
+
 
 
 builder.Services.AddCors(options =>

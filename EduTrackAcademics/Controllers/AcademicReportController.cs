@@ -1,28 +1,57 @@
-﻿using EduTrackAcademics.Services;
+﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.Exception;
+using EduTrackAcademics.Services;
 using Microsoft.AspNetCore.Mvc;
+[ApiController]
 
-namespace EduTrackAcademics.Controllers
+[Route("api/[controller]")]
+
+public class AcademicReportController : ControllerBase
+
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AcademicReportController : ControllerBase
+
+    private readonly IAcademicReportService _service;
+
+    public AcademicReportController(IAcademicReportService service)
+
     {
-        private readonly IAcademicReportService _service;
-        public AcademicReportController(IAcademicReportService service)
-        {
-            _service = service;
-        }
-        [HttpGet("batches")]
-        public IActionResult GetBatches()
-        {
-            var result = _service.GetBatches();
-            return Ok(result);
-        }
-        [HttpGet("batch-details/{reportId}")]
-        public IActionResult GetBatchDetails(string reportId)
-        {
-            var result = _service.GetBatchDetails(reportId);
-            return Ok(result);
-        }
+
+        _service = service;
+
     }
+
+    [HttpGet("get-single-report/{batchId}")]
+
+    public IActionResult GetSingleReport(string batchId)
+
+    {
+
+        try
+
+        {
+
+            var result = _service.GetSingleReport(batchId);
+
+            return Ok(result);
+
+        }
+
+        catch (BatchNotFoundException ex)
+
+        {
+
+            return NotFound(ex.Message);
+
+        }
+
+        catch (NoStudentsFoundException ex)
+
+        {
+
+            return NotFound(ex.Message);
+
+        }
+
+    }
+
 }

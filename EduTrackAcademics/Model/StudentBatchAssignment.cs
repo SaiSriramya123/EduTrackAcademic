@@ -12,10 +12,6 @@ namespace EduTrackAcademics.Model
 		//[Required]
 
 		public string BatchId { get; set; }
-		
-	
-	
-
 		[Required]
 		public string StudentId { get; set; }
 		public Student Student { get; set; }
