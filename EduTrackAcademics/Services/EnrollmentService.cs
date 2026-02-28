@@ -38,7 +38,7 @@ namespace EduTrackAcademics.Services
 
 			// Generate SAFE unique EnrollmentId
 			int count = await _repo.GetEnrollmentCountAsync();
-			var Enrollment_Id = $"E_{(count + 1):D3}";
+			var Enrollment_Id = $"E{(count + 1):D3}";
 
 			// Create enrollment (NO batch here)
 			var enrollment = new Enrollment

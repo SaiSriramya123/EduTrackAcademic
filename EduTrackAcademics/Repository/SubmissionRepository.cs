@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using EduTrackAcademics.Data;
 using EduTrackAcademics.DTO;
 using EduTrackAcademics.Model;
+using Humanizer;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Repository
 {
@@ -69,6 +70,18 @@ namespace EduTrackAcademics.Repository
 			//		.ToList();
 
 			return assessments;
+		}
+
+		public async Task<bool> IsAssessmentSubmittedAsync(String studentId, string assessmentId)
+		{
+			var exists = await _context.Submissions.AnyAsync(s => s.StudentID == studentId
+					&& s.AssessmentId == assessmentId);
+
+			if (exists)
+			{
+				return true;
+			}
+			return false;
 		}
 
 		public async Task<ViewAssessmentDto> GetAssessmentByIdAsync(string assessmentId)
@@ -166,8 +179,19 @@ namespace EduTrackAcademics.Repository
 			return submission.SubmissionId;
 		}
 
+		public async Task AddFeedbackAsync(SubmitFeedbackDto dto)
+		{
+			var submission = await _context.Submission
+				.FirstOrDefaultAsync(s => s.SubmissionId == dto.submissionId);
+			if (submission != null)
+			{
+				submission.Feedback = dto.Feedback;
+				await _context.SaveChangesAsync();
+			}
+		}
+
 		// CALCULATE SCORE & PERCENTAGE
-		public async Task<(int score, double percentage)> CalculateScoreAsync(string studentId, string assessmentId)
+		public async Task<UpdateSubmissionDto> CalculateScoreAsync(string studentId, string assessmentId)
 		{
 			// Load questions for the assessment
 			var questions = await _context.Questions
@@ -178,6 +202,9 @@ namespace EduTrackAcademics.Repository
 			var studentAnswers = await _context.StudentAnswer
 				.Where(a => a.StudentId == studentId && a.AssessmentId == assessmentId)
 				.ToListAsync();
+
+			var submission_id = await _context.Submission
+				.FirstOrDefaultAsync(s => s.StudentID == studentId && s.AssessmentId == assessmentId);
 
 			int score = 0;
 
@@ -200,22 +227,32 @@ namespace EduTrackAcademics.Repository
 			// Compute percentage, avoid division by zero
 			double percentage = (assessmentMaxMarks > 0) ? ((double)score / assessmentMaxMarks) * 100.0 : 0.0;
 
-			return (score, percentage);
+			var result = new UpdateSubmissionDto
+			{
+				StudentId = studentId,
+				AssessmentId = assessmentId,
+				submissionId = submission_id.SubmissionId,
+				Score = score,
+				Percentage = percentage
+			};
+
+			return result;
 		}
 
-		// UPDATE SCORE & FEEDBACK
-		public async Task UpdateSubmissionAsync(string submissionId, int score, string feedback)
+		// UPDATE SCORE 
+		public async Task<UpdateSubmissionDto> UpdateSubmissionAsync(UpdateSubmissionDto dto)
 		{
 			var submission = await _context.Submission
-				.FirstOrDefaultAsync(s => s.SubmissionId == submissionId);
+				.FirstOrDefaultAsync(s => s.SubmissionId == dto.submissionId);
 
 			if (submission != null)
 			{
-				submission.Score = score;
-				submission.Feedback = feedback;
+				submission.Score = dto.Score;
 
 				await _context.SaveChangesAsync();
 			}
+
+			return dto;
 		}
 	}
 }

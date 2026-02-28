@@ -26,7 +26,7 @@ namespace EduTrackAcademics.Controllers
 
 		//Student can view the assessments that are belong to that particular studnet id
 		[HttpGet("view-assessments")]
-		public async Task<IActionResult> ViewAssessments([FromQuery]FetchAssessmentDto dto)
+		public async Task<IActionResult> ViewAssessments([FromQuery] FetchAssessmentDto dto)
 		{
 			try
 			{
@@ -101,7 +101,7 @@ namespace EduTrackAcademics.Controllers
 		[HttpPost("submit")]
 		public async Task<IActionResult> SubmitAssessment([FromBody] SubmitAssessmentDto dto)
 		{
-			var result=await _service.SubmitAssessmentAsync(dto);
+			var result = await _service.SubmitAssessmentAsync(dto);
 
 			return Ok(new
 			{
@@ -124,17 +124,26 @@ namespace EduTrackAcademics.Controllers
 		//}
 
 		//After submission Feedback column is updated and scores are evaluated
-		[HttpPut("UpdateFeedback/Score")]
-		public async Task<IActionResult> UpdateSubmission(UpdateSubmissionDto dto)
+		[HttpPut("UpdateFeedback")]
+		public async Task<IActionResult> UpdateSubmission(SubmitFeedbackDto dto)
 		{
-	
-			 var result=await _service.AddFeedbackAsync(dto);
+
+			await _service.AddFeedbackAsync(dto);
 
 			return Ok(new
 			{
-				Score = result.score,
-				Percentage = result.percentage,
-				Message = "Submission updated successfully"
+				Message = "Feedback Subimitted successfully"
+			});
+		}
+
+		[HttpGet("Score")]
+		public async Task<IActionResult> UpdateSubmission([FromQuery]string studentId,string assessmentId)
+		{
+			var result = await _service.UpdateSubmissionAsync(studentId,assessmentId);
+			return Ok(new
+			{
+				data = result,
+				Message = "Score updated successfully"
 			});
 		}
 	}
