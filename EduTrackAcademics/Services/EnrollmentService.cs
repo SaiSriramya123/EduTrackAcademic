@@ -3,6 +3,7 @@ using EduTrackAcademics.DTO;
 using EduTrackAcademics.Model;
 using EduTrackAcademics.Repository;
 using EduTrackAcademics.Exception;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Services
 {
@@ -19,32 +20,38 @@ namespace EduTrackAcademics.Services
 
 		public async Task<string> AddEnrollmentAsync(EnrollmentDto dto)
 		{
-			// Generate unique EnrollmentId
-			int count = await _repo.GetEnrollmentCountAsync();
-			string enrollmentId = $"E{(count + 1):D3}";
-
-			if (await _repo.CheckIdExistsAsync(enrollmentId))
-				throw new EnrollmentAlreadyExistsException($"Enrollment already exists");
-
-			// Fetch course credits from DB
+			// 1️⃣ Validate course (course already mapped to year)
 			var course = await _context.Course.FindAsync(dto.CourseId);
 			if (course == null)
 				throw new ApplicationException("Course not found");
 
+			// 2️⃣ Prevent duplicate enrollment (Student + Course)
+			bool alreadyEnrolled = await _context.Enrollment.AnyAsync(e =>
+				e.StudentId == dto.StudentId &&
+				e.CourseId == dto.CourseId &&
+				e.Status == "Active");
+
+			if (alreadyEnrolled)
+				throw new EnrollmentAlreadyExistsException("Student already enrolled for this course");
+
+			// 3️⃣ Generate SAFE unique EnrollmentId
+			string enrollmentId = "E" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
+
+			// 4️⃣ Create enrollment (NO batch here)
 			var enrollment = new Enrollment
 			{
 				EnrollmentId = enrollmentId,
 				StudentId = dto.StudentId,
 				CourseId = dto.CourseId,
-				EnrollmentDate = DateTime.Now,   
+				EnrollmentDate = DateTime.Now,
 				Status = "Active",
-				Credits = course.Credits      
+				Credits = course.Credits
 			};
 
-			 await _repo.AddEnrollmentAsync(enrollment);
-			return  enrollmentId;
-
+			await _repo.AddEnrollmentAsync(enrollment);
+			return enrollmentId;
 		}
+
 
 
 		public async Task<List<Module>> GetContentForStudentAsync(string studentId, string courseId)

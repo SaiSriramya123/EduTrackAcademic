@@ -30,10 +30,15 @@ namespace EduTrackAcademics.Model
 		[Required]
 		[ForeignKey("Course")]
 		public string CourseId { get; set; }
+<<<<<<< HEAD
 		public Course Course { get; set; }	
     
 
 		
+=======
+		public Course Course { get; set; }
+		public ICollection<Attendance> Attendances { get; set; }
+>>>>>>> 4ebfee0d59e91bb63d0438af5366c1be4c80059b
 	}
 
 }

@@ -30,7 +30,7 @@ namespace EduTrackAcademics.Repository
 		public async Task<int> AddEnrollmentAsync(Enrollment enrollment)
 		{
 			_context.Enrollment.Add(enrollment);
-			await _context.SaveChangesAsync();  
+			await _context.SaveChangesAsync();
 			return 1;
 		}
 

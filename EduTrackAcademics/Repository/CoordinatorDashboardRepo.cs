@@ -1,5 +1,6 @@
 ﻿using EduTrackAcademics.Data;
 using EduTrackAcademics.DTO;
+using EduTrackAcademics.Exception;
 using EduTrackAcademics.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,24 +72,27 @@ namespace EduTrackAcademics.Repository
 
 		public object AssignBatches(AutoAssignBatchDTO dto)
 		{
-			var students = _context.Student
-				.Where(s =>
-					s.StudentQualification == dto.Qualification &&
-					s.StudentProgram == dto.Program &&
-					s.Year == dto.Year &&
+			var enrollments = _context.Enrollment
+				.Include(e => e.Student)
+				.Where(e =>
+					e.CourseId == dto.CourseId &&
+					e.Status == "Active" &&
+					e.Student.StudentQualification == dto.Qualification &&
+					e.Student.StudentProgram == dto.Program &&
+					e.Student.Year == dto.Year)
+				.Where(e =>
 					!_context.StudentBatchAssignments.Any(a =>
-						a.StudentId == s.StudentId &&
-						a.Batches.CourseId == dto.CourseId))
-				.OrderBy(s => s.StudentId)
+						a.StudentId == e.StudentId))
+				.OrderBy(e => e.Student.StudentId)
 				.ToList();
 
-			if (!students.Any())
-				return new { Message = "No students found" };
+			if (!enrollments.Any())
+				return new { Message = "No enrolled students available" };
 
 			int batchCounter = _context.CourseBatches.Count() + 1;
 			int assigned = 0;
 
-			for (int i = 0; i < students.Count; i += dto.BatchSize)
+			for (int i = 0; i < enrollments.Count; i += dto.BatchSize)
 			{
 				string batchId = $"B{batchCounter:D3}";
 
@@ -105,16 +109,17 @@ namespace EduTrackAcademics.Repository
 				_context.CourseBatches.Add(batch);
 				_context.SaveChanges();
 
-				var group = students.Skip(i).Take(dto.BatchSize).ToList();
+				var group = enrollments.Skip(i).Take(dto.BatchSize).ToList();
 
-				foreach (var student in group)
+				foreach (var enrollment in group)
 				{
 					_context.StudentBatchAssignments.Add(new StudentBatchAssignment
 					{
-						BatchId = batchId,
-						StudentId = student.StudentId
+						StudentId = enrollment.StudentId,
+						BatchId = batchId
 					});
 
+					enrollment.Status = "Assigned";
 					batch.CurrentStudents++;
 					assigned++;
 				}
@@ -130,26 +135,30 @@ namespace EduTrackAcademics.Repository
 				Message = "Batch assignment completed",
 				AssignedStudents = assigned
 			};
-		}
+		} 
 
 		public object AssignSingleBatch(AutoAssignBatchDTO dto)
 		{
-			var students = _context.Student
-				.Where(s =>
-					s.StudentQualification == dto.Qualification &&
-					s.StudentProgram == dto.Program &&
-					s.Year == dto.Year &&
+			// 1️⃣ Get ONLY enrolled & unassigned students
+			var students = _context.Enrollment
+				.Include(e => e.Student)
+				.Where(e =>
+					e.CourseId == dto.CourseId &&
+					e.Status == "Active" &&
+					e.Student.StudentQualification == dto.Qualification &&
+					e.Student.StudentProgram == dto.Program &&
+					e.Student.Year == dto.Year)
+				.Where(e =>
 					!_context.StudentBatchAssignments.Any(a =>
-						a.StudentId == s.StudentId &&
-						a.Batches.CourseId == dto.CourseId))
-				.OrderBy(s => s.StudentId)
+						a.StudentId == e.StudentId))
+				.OrderBy(e => e.Student.StudentId)
 				.ToList();
 
 			if (!students.Any())
-				return new { Message = "No students left to assign" };
+				return new { Message = "No enrolled students left to assign" };
 
-			int batchCount = _context.CourseBatches.Count() + 1;
-			string batchId = $"B{batchCount:D3}";
+			// 2️⃣ Create batch
+			string batchId = $"B{_context.CourseBatches.Count() + 1:D3}";
 
 			var batch = new CourseBatch
 			{
@@ -164,34 +173,60 @@ namespace EduTrackAcademics.Repository
 			_context.CourseBatches.Add(batch);
 			_context.SaveChanges();
 
+			// 3️⃣ Assign students to batch
 			var batchStudents = students.Take(dto.BatchSize).ToList();
 
-			foreach (var student in batchStudents)
+			foreach (var enrollment in batchStudents)
 			{
 				_context.StudentBatchAssignments.Add(new StudentBatchAssignment
 				{
-					BatchId = batchId,
-					StudentId = student.StudentId
+					StudentId = enrollment.StudentId,
+					BatchId = batchId
 				});
 
+				enrollment.Status = "Assigned"; // ✅ important
 				batch.CurrentStudents++;
 			}
 
 			batch.IsActive = batch.CurrentStudents < batch.MaxStudents;
 			_context.SaveChanges();
 
-			int remaining = students.Count - batchStudents.Count;
-
 			return new
 			{
-				Message = "Single batch assigned successfully",
+				Message = "Batch created & students assigned",
 				BatchId = batchId,
 				AssignedStudents = batchStudents.Count,
-				RemainingStudents = remaining,
-				NextStep = remaining > 0
-					? "Assign next batch to same or another instructor"
-					: "All students assigned"
+				RemainingStudents = students.Count - batchStudents.Count
 			};
+		}
+		public object UpdateCourse(string courseId, CourseDTO dto)
+		{
+			// Find course by CourseId
+			var course = _context.Course.FirstOrDefault(c => c.CourseId == courseId);
+			if (course == null)
+				throw new CourseNotFoundException(courseId);
+
+			// Update properties from DTO
+			course.CourseName = dto.CourseName;
+			course.AcademicYearId = dto.AcademicYearId; // map year
+			course.Credits = dto.Credits;               // optional
+			course.DurationInWeeks = dto.DurationInWeeks; // optional
+
+			_context.SaveChanges(); // save changes to DB
+
+			return course;
+		}
+
+		public bool DeleteCourse(string courseId)
+		{
+			var course = _context.Course.FirstOrDefault(c => c.CourseId == courseId);
+			if (course == null)
+				throw new CourseNotFoundException(courseId);
+
+			_context.Course.Remove(course);
+			_context.SaveChanges(); // commit delete
+
+			return true; // indicate success
 		}
 
 		public IEnumerable<object> GetInstructorBatches(string instructorId) =>

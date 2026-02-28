@@ -32,6 +32,19 @@ namespace EduTrackAcademics.Controllers
 		{
 			return Ok(_service.AddCourse(dto));
 		}
+		[HttpPut("course/{id}")]
+		public IActionResult UpdateCourse(string id, [FromBody] CourseDTO dto)
+		{
+			var updatedCourse = _service.UpdateCourse(id, dto);
+			return Ok(updatedCourse);
+		}
+
+		[HttpDelete("course/{id}")]
+		public IActionResult DeleteCourse(string id)
+		{
+			_service.DeleteCourse(id);
+			return NoContent();
+		}
 
 		[HttpGet("academic-year/{yearId}/courses")]
 		public IActionResult GetCourses(string yearId)
@@ -57,11 +70,11 @@ namespace EduTrackAcademics.Controllers
 			return Ok(_service.GetBatches(program, year));
 		}
 
-		[HttpGet("batch-count")]
-		public IActionResult GetBatchCount(string program, int year)
-		{
-			return Ok(_service.GetBatchCount(program, year));
-		}
+		//[HttpGet("batch-count")]
+		//public IActionResult GetBatchCount(string program, int year)
+		//{
+		//	return Ok(_service.GetBatchCount(program, year));
+		//}
 
 		[HttpGet("batch/{batchId}/students")]
 		public IActionResult GetStudentsInBatch(string batchId)

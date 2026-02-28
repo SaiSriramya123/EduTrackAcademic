@@ -18,5 +18,7 @@ namespace EduTrackAcademics.Repository
 		object AssignSingleBatch(AutoAssignBatchDTO dto);
 		IEnumerable<object> GetInstructorBatches(string instructorId);
 		IEnumerable<object> InstructorDashboard(string instructorId);
+		object UpdateCourse(string CourseId, CourseDTO dto);
+		bool DeleteCourse(string courseId);
 	}
 }
