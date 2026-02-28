@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduTrackAcademics.Migrations
 {
     [DbContext(typeof(EduTrackAcademicsContext))]
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
     [Migration("20260228151742_edu")]
     partial class edu
+========
+    [Migration("20260228075957_lastchanges")]
+    partial class lastchanges
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +29,33 @@ namespace EduTrackAcademics.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("EduTrackAcademics.Model.AcademicReport", b =>
+                {
+                    b.Property<string>("ReportId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("AvgScore")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("CompletionRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("DropOutRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<DateTime>("GeneratedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ReportId");
+
+                    b.ToTable("AcademicReport");
+                });
 
             modelBuilder.Entity("EduTrackAcademics.Model.AcademicYear", b =>
                 {
@@ -100,7 +132,7 @@ namespace EduTrackAcademics.Migrations
 
                     b.Property<string>("EnrollmentID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -112,8 +144,9 @@ namespace EduTrackAcademics.Migrations
                     b.Property<DateTime>("SessionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdateReason")
                         .HasColumnType("nvarchar(max)");
@@ -124,6 +157,8 @@ namespace EduTrackAcademics.Migrations
                     b.HasKey("AttendanceID");
 
                     b.HasIndex("BatchId");
+
+                    b.HasIndex("EnrollmentID");
 
                     b.ToTable("Attendances");
                 });
@@ -483,6 +518,45 @@ namespace EduTrackAcademics.Migrations
                     b.ToTable("Notification");
                 });
 
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
+========
+            modelBuilder.Entity("EduTrackAcademics.Model.Performance", b =>
+                {
+                    b.Property<string>("ProgressID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("AvgScore")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("BatchId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("CompletionPercentage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("EnrollmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ProgressID");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Performances");
+                });
+
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
             modelBuilder.Entity("EduTrackAcademics.Model.ProgramEntity", b =>
                 {
                     b.Property<string>("ProgramId")
@@ -521,11 +595,6 @@ namespace EduTrackAcademics.Migrations
                 {
                     b.Property<string>("QuestionId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AnswerText")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("AssessmentId")
                         .IsRequired()
@@ -651,6 +720,12 @@ namespace EduTrackAcademics.Migrations
                     b.Property<int?>("EducationGap")
                         .HasColumnType("int");
 
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
+========
+                    b.Property<decimal?>("GateScore")
+                        .HasColumnType("decimal(18,2)");
+
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
                     b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
@@ -665,6 +740,39 @@ namespace EduTrackAcademics.Migrations
                     b.ToTable("StudentAdditionalDetails");
                 });
 
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
+========
+            modelBuilder.Entity("EduTrackAcademics.Model.StudentAnswer", b =>
+                {
+                    b.Property<string>("StudentAnswerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("AssessmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QuestionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("createdDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("StudentAnswerId");
+
+                    b.ToTable("StudentAnswer");
+                });
+
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
             modelBuilder.Entity("EduTrackAcademics.Model.StudentBatchAssignment", b =>
                 {
                     b.Property<string>("BatchId")
@@ -731,7 +839,11 @@ namespace EduTrackAcademics.Migrations
 
                     b.HasKey("Id");
 
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
                     b.ToTable("AuditLog");
+========
+                    b.ToTable("StudentLoginHistory");
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.StudentProgress", b =>
@@ -762,6 +874,7 @@ namespace EduTrackAcademics.Migrations
                     b.ToTable("StudentProgress");
                 });
 
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
             modelBuilder.Entity("EduTrackAcademics.Model.Users", b =>
                 {
                     b.Property<int>("UserId")
@@ -800,6 +913,35 @@ namespace EduTrackAcademics.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+========
+            modelBuilder.Entity("EduTrackAcademics.Model.Submission", b =>
+                {
+                    b.Property<string>("SubmissionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AssessmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudentID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SubmissionId");
+
+                    b.ToTable("Submission");
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.AcademicYear", b =>
@@ -816,7 +958,7 @@ namespace EduTrackAcademics.Migrations
             modelBuilder.Entity("EduTrackAcademics.Model.Assessment", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Course", "Course")
-                        .WithMany()
+                        .WithMany("Assessments")
                         .HasForeignKey("CourseID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -831,6 +973,14 @@ namespace EduTrackAcademics.Migrations
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("EduTrackAcademics.Model.Enrollment", "Enrollment")
+                        .WithMany("Attendances")
+                        .HasForeignKey("EnrollmentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Enrollment");
 
                     b.Navigation("StudentBatchAssignment");
                 });
@@ -962,6 +1112,17 @@ namespace EduTrackAcademics.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("EduTrackAcademics.Model.Performance", b =>
+                {
+                    b.HasOne("EduTrackAcademics.Model.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("EduTrackAcademics.Model.ProgramEntity", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Qualification", "Qualification")
@@ -984,6 +1145,7 @@ namespace EduTrackAcademics.Migrations
                     b.Navigation("Assessment");
                 });
 
+<<<<<<<< HEAD:EduTrackAcademics/Migrations/20260228151742_edu.Designer.cs
             modelBuilder.Entity("EduTrackAcademics.Model.Student", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Users", "User")
@@ -993,6 +1155,8 @@ namespace EduTrackAcademics.Migrations
                     b.Navigation("User");
                 });
 
+========
+>>>>>>>> e6beeeb18c2ae5efc0e4b6337d85b3e809f9a75f:EduTrackAcademics/Migrations/20260228075957_lastchanges.Designer.cs
             modelBuilder.Entity("EduTrackAcademics.Model.StudentAdditionalDetails", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Student", "Student")
@@ -1007,7 +1171,7 @@ namespace EduTrackAcademics.Migrations
             modelBuilder.Entity("EduTrackAcademics.Model.StudentBatchAssignment", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.CourseBatch", "Batches")
-                        .WithMany()
+                        .WithMany("StudentBatchAssignments")
                         .HasForeignKey("BatchesBatchId");
 
                     b.HasOne("EduTrackAcademics.Model.Student", "Student")
@@ -1052,7 +1216,19 @@ namespace EduTrackAcademics.Migrations
 
             modelBuilder.Entity("EduTrackAcademics.Model.Course", b =>
                 {
+                    b.Navigation("Assessments");
+
                     b.Navigation("Enrollments");
+                });
+
+            modelBuilder.Entity("EduTrackAcademics.Model.CourseBatch", b =>
+                {
+                    b.Navigation("StudentBatchAssignments");
+                });
+
+            modelBuilder.Entity("EduTrackAcademics.Model.Enrollment", b =>
+                {
+                    b.Navigation("Attendances");
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.Module", b =>

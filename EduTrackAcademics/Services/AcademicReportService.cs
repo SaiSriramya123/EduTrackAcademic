@@ -10,13 +10,10 @@ namespace EduTrackAcademics.Services
         {
             _repo = repo;
         }
-        public List<AcademicReport> GetBatches()
-        {
-            return _repo.GetBatches();
-        }
-        public AcademicReport GetBatchDetails(string reportId)
-        {
-            return _repo.GetBatchDetails(reportId);
+
+		public List<BatchAveragePerformanceDTO> GetAllBatchPerformanceReport()
+		{
+            return _repo.GetAllBatchPerformanceReport();
         }
     }
 }

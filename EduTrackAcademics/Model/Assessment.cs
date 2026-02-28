@@ -11,8 +11,9 @@ namespace EduTrackAcademics.Model
 		public string AssessmentID { get; set; }
 
 		[Required]
-		[ForeignKey("Course")]
 		public string CourseID { get; set; }
+
+		[ForeignKey(nameof(CourseID))]
 		public Course Course { get; set; }
 
 		[Required]
@@ -32,5 +33,6 @@ namespace EduTrackAcademics.Model
 		public string? Feedback { get; set; }
 		public DateTime CreatedOn { get; set; } = DateTime.Now;
 		public List<Question> Questions { get; set; } = new();
-	}
+			
+    }
 }

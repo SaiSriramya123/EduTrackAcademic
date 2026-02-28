@@ -1,9 +1,11 @@
-﻿using System.Runtime.Intrinsics.Arm;
-using EduTrackAcademics.Data;
-using EduTrackAcademics.Model;
+﻿using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
-using System.Linq;
+using EduTrackAcademics.Data;
+using EduTrackAcademics.DTO;
+using EduTrackAcademics.Model;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace EduTrackAcademics.Repository
 {
@@ -20,6 +22,7 @@ namespace EduTrackAcademics.Repository
 			return await _context.Enrollment.CountAsync();
 		}
 
+		//Checks if duplicates are present or not
 		public async Task<bool> CheckIdExistsAsync(string enrollmentId)
 		{
 			return await Task.FromResult(
@@ -27,14 +30,7 @@ namespace EduTrackAcademics.Repository
 			);
 		}
 
-		public async Task<int> AddEnrollmentAsync(Enrollment enrollment)
-		{
-			_context.Enrollment.Add(enrollment);
-			await _context.SaveChangesAsync();   // ✅ persist changes
-			return 1;
-		}
-
-
+		// check whether the student enrolled for particular course or not
 		public async Task<bool> IsEnrolledAsync(string studentId, string courseId)
 		{
 			return await Task.FromResult(
@@ -43,25 +39,63 @@ namespace EduTrackAcademics.Repository
 			);
 		}
 
-		public async Task<List<Module>> GetModulesByCourseAsync(string courseId)
+		public async Task<int> AddEnrollmentAsync(Enrollment enrollment)
 		{
-			var modules = _context.Modules
-				.Where(m => m.CourseID == courseId)
-				.OrderBy(m => m.SequenceOrder)
-				.ToList();
-
-			// Attach contents to each module
-			foreach (var module in modules)
-			{
-				module.Content = _context.Contents
-					.Where(c => c.ModuleID == module.ModuleID)
-					.ToList();
-			}
-
-			return await Task.FromResult(modules);
+			_context.Enrollment.Add(enrollment);
+			await _context.SaveChangesAsync();
+			return 1;
 		}
 
-		
+		//return the module along with the contents 
+		public async Task<List<ModuleWithContentDto>> GetModulesByCourseAsync(string courseId)
+		{
+
+			var modules = await _context.Modules
+			.Where(m => m.CourseID == courseId)
+			.OrderBy(m => m.SequenceOrder)
+			.Select(m => new ModuleWithContentDto
+			{
+				ModuleID = m.ModuleID,
+				ModuleName = m.Name,
+				SequenceOrder = m.SequenceOrder,
+
+				Contents = _context.Contents
+				.Where(c => c.ModuleID == m.ModuleID && c.Status == "Published")
+				.Select(c => new ModuleContentDto
+				{
+					ContentID = c.ContentID,
+					Title = c.Title,
+					ContentType = c.ContentType,
+					ContentURI = c.ContentURI,
+					Duration = c.Duration
+				})
+				.ToList()
+			})
+			.ToListAsync();
+
+			return modules;
+		}
+
+		public async Task<bool> CheckIfProgressExistsAsync(string studentId, string contentId)
+		{
+			return await Task.FromResult(
+				_context.StudentProgress.Any(p =>
+					p.StudentId == studentId &&
+					p.ContentId == contentId)
+			);
+		}
+
+		public async Task<int> GetProgressCountAsync()
+		{
+			return await Task.FromResult<int>(_context.StudentProgress.Count());
+		}
+
+		public async Task<int> MarkContentCompletedAsync(StudentProgress progress)
+		{
+			_context.StudentProgress.Add(progress);
+			_context.SaveChanges();
+			return await Task.FromResult(1);
+		}
 		public async Task<double> GetCourseProgressPercentageAsync(string studentId, string courseId)
 		{
 			var moduleIds = _context.Modules
@@ -74,7 +108,7 @@ namespace EduTrackAcademics.Repository
 				.Select(c => c.ContentID)
 				.ToList();
 
-			int totalContentCount = contentIds.Count;
+			int totalContentCount = contentIds.Count();
 
 			if (totalContentCount == 0)
 				return 0;
@@ -85,7 +119,7 @@ namespace EduTrackAcademics.Repository
 					contentIds.Contains(p.ContentId) &&
 					p.IsCompleted);
 
-			double percentage = ((double)completedItems / totalContentCount) * 100;
+			double percentage = ((double)completedItems / (double)totalContentCount) * 100;
 
 			return await Task.FromResult(Math.Round(percentage, 2));
 		}
@@ -105,5 +139,35 @@ namespace EduTrackAcademics.Repository
 
 			await Task.CompletedTask;
 		}
+
+		public async Task<List<Enrollment>> GetEnrollmentsByStudentIdAsync(string studentId)
+		{
+			return await _context.Enrollment
+				.Include(e => e.Course)
+				.Where(e => e.StudentId == studentId)
+				.ToListAsync();
+		}
+
+		public async Task<List<Attendance>> GetStudentAttendanceAsync(string enrollmentId)
+		{
+			return await _context.Attendances
+				.Where(a => a.EnrollmentID == enrollmentId && !a.IsDeleted)
+				.ToListAsync();
+		}
+
+		public async Task<List<CourseBatch>> GetBatchesByCourseAsync(string courseId)
+		{
+			return await _context.CourseBatches
+				.Where(b => b.CourseId == courseId && b.IsActive)
+				.ToListAsync();
+		}
+
+		public async Task<List<Attendance>> GetBatchAttendanceAsync(string batchId)
+		{
+			return await _context.Attendances
+				.Where(a => a.BatchId == batchId && !a.IsDeleted)
+				.ToListAsync();
+		}
+
 	}
 }

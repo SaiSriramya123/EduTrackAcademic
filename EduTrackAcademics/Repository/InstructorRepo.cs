@@ -1,4 +1,5 @@
 ﻿using EduTrackAcademics.Data;
+using EduTrackAcademics.Exception;
 using EduTrackAcademics.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,63 +14,19 @@ namespace EduTrackAcademics.Repository
 			_context = context;
 		}
 
-		public async Task<object> GetBatches(string instructorId)
+		// MODULE
+
+		public async Task<string> GenerateModuleIdAsync()
 		{
-			return await _context.CourseBatches
-				.Where(b => b.InstructorId == instructorId)
-				.Select(b => new
-				{
-					b.BatchId,
-					b.MaxStudents,
-					b.CurrentStudents,
-					b.IsActive,
-					b.Course.CourseId,
-					b.Course.CourseName
-				}).ToListAsync();
-		}
+			var lastModule = await _context.Modules
+				.OrderByDescending(m => m.ModuleID)
+				.FirstOrDefaultAsync();
 
-		public async Task<object> GetStudents(string batchId)
-		{
-			return await _context.StudentBatchAssignments
-				.Where(s => s.BatchId == batchId)
-				.Select(s => new
-				{
-					s.Student.StudentId,
-					s.Student.StudentName,
-					s.Student.StudentEmail,
-					s.Student.StudentPhone
-				}).ToListAsync();
-		}
+			if (lastModule == null)
+				return "M001";
 
-		public async Task<object> GetDashboard(string instructorId)
-		{
-			var dashboard = await (
-				from batch in _context.CourseBatches
-				where batch.InstructorId == instructorId
-
-				join course in _context.Course
-					on batch.CourseId equals course.CourseId
-
-				join sba in _context.StudentBatchAssignments
-					on batch.BatchId equals sba.BatchId into sbagroup
-
-				select new
-				{
-					batch.BatchId,
-					batch.CourseId,
-					CourseName = course.CourseName,
-
-					Students = sbagroup.Select(s => new
-					{
-						s.Student.StudentId,
-						s.Student.StudentName,
-						s.Student.StudentEmail,
-						s.Student.StudentPhone
-					}).ToList()
-				}
-			).ToListAsync();
-
-			return dashboard;
+			int num = int.Parse(lastModule.ModuleID.Substring(1));
+			return $"M{(num + 1).ToString("D3")}";
 		}
 
 		public async Task AddModuleAsync(Module module)
@@ -78,165 +35,263 @@ namespace EduTrackAcademics.Repository
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateModuleAsync(string id, Module module)
+		public async Task<List<Module>> GetModulesByCourseAsync(string courseId)
 		{
-			var existing = await _context.Modules.FindAsync(id);
+			return await _context.Modules
+				.Where(m => m.CourseID == courseId)
+				.OrderBy(m => m.SequenceOrder)
+				.ToListAsync();
+		}
 
-			if (existing == null)
-				throw new KeyNotFoundException("Module not found");
+		public async Task<Module> GetModuleByIdAsync(string moduleId)
+		{
+			return await _context.Modules
+				.FirstOrDefaultAsync(m => m.ModuleID == moduleId);
+		}
 
-			existing.Name = module.Name;
-			existing.SequenceOrder = module.SequenceOrder;
-			existing.LearningObjectives = module.LearningObjectives;
-
+		public async Task UpdateModuleAsync(Module module)
+		{
+			_context.Modules.Update(module);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task DeleteModuleAsync(string id)
+		// CONTENT
+
+		public async Task<string> GenerateContentIdAsync()
 		{
-			var module = await _context.Modules.FindAsync(id);
-			if (module == null)
-				throw new KeyNotFoundException("Module not found");
-			_context.Modules.Remove(module);
+			var last = await _context.Contents
+				.OrderByDescending(c => c.ContentID)
+				.Select(c => c.ContentID)
+				.FirstOrDefaultAsync();
+
+			if (last == null) return "CT001";
+
+			int num = int.Parse(last.Substring(3));
+			return $"CT{num + 1:D3}";
+		}
+
+		public async Task<bool> ModuleExistsAsync(string moduleId)
+		{
+			return await _context.Modules.AnyAsync(m => m.ModuleID == moduleId);
+		}
+
+		public async Task AddContentAsync(Content content)
+		{
+			await _context.Contents.AddAsync(content);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<object> GetModules(string courseId)
+		public async Task<Content> GetContentByIdAsync(string contentId)
 		{
-			return await _context.Modules.Where(m => m.CourseID == courseId).ToListAsync();
+			return await _context.Contents.FindAsync(contentId);
 		}
 
-		public async Task<bool> CompleteModule(string moduleId)
+		public async Task<List<Content>> GetContentByModuleAsync(string moduleId)
 		{
-			return await _context.Contents.AnyAsync(c => c.ModuleID == moduleId);
+			return await _context.Contents
+				.Where(c => c.ModuleID == moduleId)
+				.ToListAsync();
 		}
 
-		public async Task AddContent(Content c)
+		public async Task UpdateContentAsync(Content content)
 		{
-			_context.Contents.Add(c);
+			_context.Contents.Update(content);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateContent(Content c)
+		public async Task DeleteContentAsync(Content content)
 		{
-			_context.Contents.Update(c);
-			await _context.SaveChangesAsync();
-		}
-
-		public async Task DeleteContent(string id)
-		{
-			var content = await _context.Contents.FindAsync(id);
-			if (content == null)
-				return;
 			_context.Contents.Remove(content);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<object> GetContent(string moduleId)
+		// ASSESSMENT
+
+		public async Task<string> GenerateAssessmentIdAsync()
 		{
-			return await _context.Contents.Where(c => c.ModuleID == moduleId).ToListAsync();
+			var last = await _context.Assessments
+				.OrderByDescending(a => a.AssessmentID)
+				.Select(a => a.AssessmentID)
+				.FirstOrDefaultAsync();
+
+			int next = last == null ? 1 : int.Parse(last.Substring(1)) + 1;
+			return $"A{next:000}";
+
 		}
 
-		public async Task AddAssessment(Assessment a)
+		public async Task AddAssessmentAsync(Assessment assessment)
 		{
-			_context.Assessments.Add(a);
+			await _context.Assessments.AddAsync(assessment);
+			await _context.SaveChangesAsync();
+		}
+		  
+		public async Task<Assessment?> GetAssessmentByIdAsync(string id)
+			=> await _context.Assessments.FindAsync(id);
+
+		public async Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId)
+			=> await _context.Assessments
+				.Where(a => a.CourseID == courseId)
+				.ToListAsync();
+
+		public async Task UpdateAssessmentAsync(Assessment assessment)
+		{
+			_context.Assessments.Update(assessment);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateAssessment(Assessment a)
+		public async Task DeleteAssessmentAsync(Assessment assessment)
 		{
-			_context.Assessments.Update(a);
-			await _context.SaveChangesAsync();
-		}
-
-		public async Task DeleteAssessment(string id)
-		{
-			var assessment = await _context.Assessments.FindAsync(id);
-			if (assessment == null)
-				return;
 			_context.Assessments.Remove(assessment);
 			await _context.SaveChangesAsync();
+
 		}
 
-		public async Task<object> GetAssessments(string courseId)
+		// QUESTIONS
+
+		public async Task<string> GenerateQuestionIdAsync()
 		{
-			return await _context.Assessments.Where(a => a.CourseID == courseId).ToListAsync();
+			var last = await _context.Questions
+				.OrderByDescending(q => q.QuestionId)
+				.Select(q => q.QuestionId)
+				.FirstOrDefaultAsync();
+
+			int next = last == null ? 1 : int.Parse(last.Substring(1)) + 1;
+			return $"Q{next:000}";
 		}
 
-		public async Task<object> GetQuestions(string assessmentId)
+		public async Task<bool> QuestionExistsAsync(string id)
+			=> await _context.Questions.AnyAsync(q => q.QuestionId == id);
+
+		public async Task AddQuestionAsync(Question question)
 		{
-			return await _context.Questions.Where(q => q.AssessmentId == assessmentId).ToListAsync();
+			await _context.Questions.AddAsync(question);
+			await _context.SaveChangesAsync(); // <-- critical
 		}
 
-		public async Task EvaluateAssessment(string id, int marks, string feedback)
+
+		public async Task<Question?> GetQuestionByIdAsync(string id)
+			=> await _context.Questions.FindAsync(id);
+
+		public async Task<List<Question>> GetQuestionsByAssessmentAsync(string assessmentId)
+			=> await _context.Questions
+				.Where(q => q.AssessmentId == assessmentId)
+				.ToListAsync();
+
+		public async Task UpdateQuestionAsync(Question question)
 		{
-			var a = await _context.Assessments.FindAsync(id);
-			a.MarksObtained = marks;
-			a.Feedback = feedback;
-			a.Status = "Evaluated";
+			_context.Questions.Update(question);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task MarkAttendance(Attendance a)
+		public async Task DeleteQuestionAsync(Question question)
 		{
-			a.SessionDate = DateTime.Now;
-			_context.Attendances.Add(a);
+			_context.Questions.Remove(question);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateAttendance(string id, Attendance u)
+		// ATTENDANCE
+
+		public async Task<bool> EnrollmentExistsAsync(string enrollmentId)
 		{
-			var r = await _context.Attendances.FindAsync(id);
-			r.Status = u.Status;
-			r.Mode = u.Mode;
-			r.UpdateReason = u.UpdateReason;
-			r.UpdatedOn = DateTime.Now;
-			await _context.SaveChangesAsync();
+			return await _context.Enrollment
+				.AnyAsync(e => e.EnrollmentId == enrollmentId);
 		}
 
-		public async Task DeleteAttendance(string id, string reason)
+		public async Task<bool> BatchExistsAsync(string batchId)
 		{
-			var record = await _context.Attendances.FindAsync(id);
-			if (record == null)
-				return;
-			record.IsDeleted = true;
-			record.DeletionReason = reason;
-			record.DeletionDate = DateTime.Now;
-			await _context.SaveChangesAsync();
+			return await _context.CourseBatches
+				.AnyAsync(b => b.BatchId == batchId);
 		}
 
-		public async Task<object> GetAttendance(string batchId)
+		public async Task<bool> AttendanceExistsAsync(string enrollmentId, DateTime date)
 		{
 			return await _context.Attendances
+				.AnyAsync(a =>
+					a.EnrollmentID == enrollmentId &&
+					a.SessionDate.Date == date.Date &&
+					!a.IsDeleted);
+		}
+
+		public async Task<string> GenerateAttendanceIdAsync()
+		{
+			var last = await _context.Attendances
+				.OrderByDescending(a => a.AttendanceID)
+				.FirstOrDefaultAsync();
+
+			if (last == null)
+				return "A001";
+
+			int number = int.Parse(last.AttendanceID.Substring(1));
+			return $"A{(number + 1).ToString("D3")}";
+		}
+
+		public async Task AddAttendanceAsync(Attendance attendance)
+		{
+			_context.Attendances.Add(attendance);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task<List<Attendance>> GetAllAttendanceAsync()
+		{
+			return await _context.Attendances
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
+				.Where(a => !a.IsDeleted)
+				.ToListAsync();
+		}
+
+		public async Task<List<Attendance>> GetAttendanceByDateAsync(DateTime date)
+		{
+			return await _context.Attendances
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
+				.Where(a => a.SessionDate.Date == date.Date && !a.IsDeleted)
+				.ToListAsync();
+		}
+
+		public async Task<List<Attendance>> GetAttendanceByBatchAsync(string batchId)
+		{
+			return await _context.Attendances
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
 				.Where(a => a.BatchId == batchId && !a.IsDeleted)
 				.ToListAsync();
 		}
 
-		public async Task<object> GetAttendanceReport(string batchId)
+		public async Task<List<Attendance>> GetAttendanceByEnrollmentAsync(string enrollmentId)
 		{
 			return await _context.Attendances
-				.Where(a => a.BatchId == batchId && !a.IsDeleted)
-				.GroupBy(a => a.StudentBatchAssignment.Student.StudentName)
-				.Select(g => new
-				{
-					Student = g.Key,
-					Present = g.Count(x => x.Status),
-					Absent = g.Count(x => !x.Status)
-				}).ToListAsync();
-		}
-
-		public async Task<object> GetIrregularStudents(string batchId)
-		{
-			return await _context.Attendances
-				.Where(a => a.BatchId == batchId && !a.IsDeleted)
-				.GroupBy(a => a.StudentBatchAssignment.Student.StudentName)
-				.Select(g => new
-				{
-					Student = g.Key,
-					Absences = g.Count(x => !x.Status)
-				})
-				.Where(x => x.Absences > 3)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Student)
+				.Include(a => a.Enrollment)
+					.ThenInclude(e => e.Course)
+				.Where(a => a.EnrollmentID == enrollmentId && !a.IsDeleted)
 				.ToListAsync();
 		}
+
+		public async Task<Attendance> GetAttendanceByIdAsync(string attendanceId)
+		{
+			return await _context.Attendances
+				.FirstOrDefaultAsync(a => a.AttendanceID == attendanceId && !a.IsDeleted);
+		}
+
+		public async Task UpdateAttendanceAsync(Attendance attendance)
+		{
+			_context.Attendances.Update(attendance);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task SoftDeleteAttendanceAsync(Attendance attendance)
+		{
+			_context.Attendances.Update(attendance);
+			await _context.SaveChangesAsync();
+		}
+
 	}
 }

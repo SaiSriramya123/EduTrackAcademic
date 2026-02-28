@@ -16,26 +16,21 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =======================
-// Database
-// =======================
+
+
 builder.Services.AddDbContext<EduTrackAcademicsContext>(options =>
 	options.UseSqlServer(
 		builder.Configuration.GetConnectionString("EduTrackAcademicsContext")
 		?? throw new InvalidOperationException("Connection string not found")
 	));
 
-// =======================
-// Controllers & Swagger
-// =======================
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
-// =======================
-// Dependency Injection
-// =======================
+
 builder.Services.AddScoped<ICoordinatorDashboardRepo, CoordinatorDashboardRepo>();
 builder.Services.AddScoped<ICoordinatorDashboardService, CoordinatorDashboardService>();
 
@@ -60,8 +55,8 @@ builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
-builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
-builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
+//builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
+//builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
 
 // Student Profile
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
@@ -102,9 +97,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 		};
 	});
 
-// =======================
-// CORS
-// =======================
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+
+builder.Services.AddScoped<IAcademicReportRepository, AcademicReportRepository>();
+builder.Services.AddScoped<IAcademicReportService, AcademicReportService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+
+
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowAll", policy =>
@@ -136,5 +138,6 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+
 
 app.Run();
