@@ -14,7 +14,8 @@ namespace EduTrackAcademics.Data
         {
         }
 
-        public DbSet<EduTrackAcademics.Model.Course> Course { get; set; } = default!;
+		public DbSet<EduTrackAcademics.Model.Users> Users { get; set; } = default!;
+		public DbSet<EduTrackAcademics.Model.Course> Course { get; set; } = default!;
         public DbSet<EduTrackAcademics.Model.Student> Student { get; set; }
 		public DbSet<EduTrackAcademics.Model.StudentAdditionalDetails> StudentAdditionalDetails { get; set; }
 		public DbSet<EduTrackAcademics.Model.StudentLoginHistory> AuditLog { get; set; }
@@ -51,9 +52,28 @@ namespace EduTrackAcademics.Data
 				.HasMany(y => y.Courses)
 				.WithOne(c => c.AcademicYear)
 				.HasForeignKey(c => c.AcademicYearId);
+
+			modelBuilder.Entity<Users>()
+				.HasOne(u => u.Student)
+				.WithOne(s => s.User)
+				.HasForeignKey<Student>(s => s.UserId);
+
+			modelBuilder.Entity<Users>()
+				.HasOne(u => u.Instructor)
+				.WithOne(i => i.User)
+				.HasForeignKey<Instructor>(i => i.UserId);
+
+			modelBuilder.Entity<Users>()
+				.HasOne(u => u.Coordinator)
+				.WithOne(c => c.User)
+				.HasForeignKey<Coordinator>(c => c.UserId);
+
 		}
         public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;
 
 		public DbSet<EduTrackAcademics.Model.StudentProgress> StudentProgress { get; set; } = default!;
+
+		
+
 	}
 }

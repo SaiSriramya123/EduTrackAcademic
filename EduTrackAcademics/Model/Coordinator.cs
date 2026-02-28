@@ -7,27 +7,28 @@ namespace EduTrackAcademics.Model
 	{
 		[Key]
 		public string CoordinatorId { get; set; }
+
+		[ForeignKey("User")] 
+		public int? UserId { get; set; }
+		public Users User { get; set; } // Navigation property to Users
+
 		[Required]
 		public string CoordinatorName { get; set; }
 
 		[Required, EmailAddress]
 		public string CoordinatorEmail { get; set; }
 
-		public string Role { get; set; } 
+		public string Role { get; set; } ="Coordinator";
 
 		public long CoordinatorPhone { get; set; }
 
 		public string CoordinatorQualification { get; set; }
 
-		public string CoordinatorExperience { get; set; }
+		public int CoordinatorExperience { get; set; }
 
 		public string CoordinatorGender { get; set; }
-		[Required]
-		[NotMapped]
-		public IFormFile Resume { get; set; }
-
-		[Required]
-		public string ResumePath{ get; set; }
+		
+		public string Resumepath { get; set; }
 
 		[Required]
 		public string CoordinatorPassword { get; set; }
@@ -35,7 +36,6 @@ namespace EduTrackAcademics.Model
 		public bool IsFirstLogin { get; set; }
 		[Required]
 		public bool IsActive { get; set; }
-
 
 	}
 }

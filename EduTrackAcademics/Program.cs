@@ -1,13 +1,18 @@
+using System.Text;
+using EduTrackAcademics.Aspects;
+using EduTrackAcademics.Aspects;
+using EduTrackAcademics.AuthFolder;
+using EduTrackAcademics.AuthFolder;
 using EduTrackAcademics.Data;
 using EduTrackAcademics.Dummy;
 using EduTrackAcademics.Repository;
 using EduTrackAcademics.Service;
 using EduTrackAcademics.Services;
-using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using EduTrackAcademics.AuthFolder;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,13 +31,13 @@ builder.Services.AddDbContext<EduTrackAcademicsContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 // =======================
 // Dependency Injection
 // =======================
 builder.Services.AddScoped<ICoordinatorDashboardRepo, CoordinatorDashboardRepo>();
-builder.Services.AddScoped<ICoordinatorDashboardService, CoordinatorDashboardService > ();
-
+builder.Services.AddScoped<ICoordinatorDashboardService, CoordinatorDashboardService>();
 
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IInstructorRepo, InstructorRepo>();
@@ -42,13 +47,12 @@ builder.Services.AddSingleton<DummyInstructor>();
 builder.Services.AddSingleton<DummyStudent>();
 builder.Services.AddSingleton<DummyInstructorReg>();
 
-builder.Services.AddScoped<IRegistrationRepo, RegistrationRepo>();
+builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
 builder.Services.AddScoped<IdService>();
 builder.Services.AddScoped<PasswordService>();
-builder.Services.AddScoped<EmailService>();
-
+//builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddScoped<IPerformanceRepository, PerformanceRepository>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
@@ -58,23 +62,44 @@ builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
 builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
 builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
-//builder.Services.AddSingleton<DummyEnrollment>();
 
-//create builder classes for StudentProfile
-builder.Services.AddScoped<IStudentDashboardRepo, StudentDashboardRepo>();
-builder.Services.AddScoped<IStudentProfileRepo, StudentProfileRepo>();
-builder.Services.AddScoped<IAuthorization, Authorization>();
+// Student Profile
+builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
+builder.Services.AddScoped<IStudentProfileRepository, StudentProfileRepository>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) .
-	AddJwtBearer(options => { 
-	options.TokenValidationParameters = new TokenValidationParameters 
-	  { 
-		ValidateIssuer = false, // set true if you want issuer
-	    ValidateAudience = false, // set true if you want audience validation
-		ValidateLifetime = true, 
-		ValidateIssuerSigningKey = true, 
-		IssuerSigningKey = new SymmetricSecurityKey( Encoding.UTF8.GetBytes("This_is_my_first_Test_Key_for_jwt_token"))
-	   }; 
+
+// Auth
+builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<JWTTokenGenerator>();
+
+//for authentication
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddFluentValidationAutoValidation();
+
+
+
+
+
+// =======================
+// JWT Authentication
+// =======================
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(
+				Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])
+			),
+			ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+			ValidAudience = builder.Configuration["JwtSettings:Audience"]
+		};
 	});
 
 // =======================
@@ -93,6 +118,7 @@ var app = builder.Build();
 // =======================
 // Middleware
 // =======================
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -102,10 +128,13 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseAuthorization();
-app.UseAuthentication();
 
 app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+
 app.MapControllers();
 
 app.Run();

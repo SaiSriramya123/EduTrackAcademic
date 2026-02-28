@@ -10,15 +10,12 @@ public class CoordinatorDTO
 
 	[Required, EmailAddress]
 	public string CoordinatorEmail { get; set; }
-
 	public long CoordinatorPhone { get; set; }
-
 	public string CoordinatorQualification { get; set; }
 
-	public string CoordinatorExperience { get; set; }
+	public int CoordinatorExperience { get; set; }
 
 	public string CoordinatorGender { get; set; }
-
-	[Required]
-	public IFormFile Resume { get; set; }
+	public string CoordinatorPassword { get; set; }
+	public IFormFile Resumepath { get; set; }
 }

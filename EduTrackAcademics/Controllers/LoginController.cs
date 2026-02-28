@@ -1,69 +1,72 @@
-﻿using System.Data;
-using EduTrackAcademics.AuthFolder;
-using EduTrackAcademics.AuthFolder;
-using EduTrackAcademics.Model;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using EduTrackAcademics.DTO;
+using EduTrackAcademics.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
-
-
+using EduTrackAcademics.AuthFolder;
 namespace EduTrackAcademics.Controllers
 {
-		[ApiController]
-		[Route("api/auth")]
-		public class LoginAuthorizationController : ControllerBase
+	[ApiController]
+	[Route("api/[controller]")]
+	public class AuthController : ControllerBase
+	{
+		private readonly IAuthenticationService _authService;
+
+		public AuthController(IAuthenticationService authService)
 		{
-			private readonly IAuthorization _authService;
-
-			public LoginAuthorizationController(IAuthorization authService)
-			{
-				_authService = authService;
-			}
-
-
-		[Authorize(Roles = "Student")]
-		[HttpPost("student-login")]
-			public IActionResult StudentLogin([FromBody] Student student)
-			{
-				var token = _authService.AuthenticateStudent(student);
-				if (token == null) return Unauthorized(new { Message = "Invalid student credentials." });
-
-				return Ok(new { Message = "Login successful", Role = "Student", Token = token });
-			}
-
-	      	[Authorize(Roles = "Instructor")]
-			[HttpPost("instructor-login")]
-			public IActionResult InstructorLogin([FromBody] Instructor instructor)
-			{
-				var token = _authService.AuthenticateInstructor(instructor);
-				if (token == null) return Unauthorized(new { Message = "Invalid instructor credentials." });
-
-				return Ok(new { Message = "Login successful", Role = "Instructor", Token = token });
-			}
-
-		[Authorize(Roles = "Coordinator")]
-		[HttpPost("coordinator-login")]
-			public IActionResult CoordinatorLogin([FromBody] Coordinator coordinator)
-			{
-				var token = _authService.AuthenticateCoordinator(coordinator);
-				if (token == null) 
-				return Unauthorized(new { Message = "Invalid coordinator credentials."
-				});
-
-				return Ok(new { Message = "Login successful", Role = "Coordinator", Token = token });
-			}
-
-			[HttpPost("logout/{userId}")]
-			public IActionResult Logout(string userId)
-			{
-				var result = _authService.Logout(userId);
-
-				if (!result)
-					return BadRequest(new { Message = "Logout failed." });
-
-				return Ok(new { Message = "Logout successful." });
-			}
+			_authService = authService;
 		}
-}
 
+		[HttpPost("login")]
+		public async Task<IActionResult> Login([FromBody] LoginDTO dto)
+		{
+			var token = await _authService.LoginAsync(dto);
+			if (token == null) return Unauthorized(new { Message = "Invalid email or password." });
+
+			return Ok(new { Token = token });
+		}
+
+		[HttpPost("generate-otp")]
+		public async Task<IActionResult> GenerateOtp([FromBody] EmailRequest request)
+		{
+			var otp = await _authService.GenerateOtpAsync(request.Email);
+			if (otp == null) return NotFound(new { Message = "User not found." });
+
+			return Ok(new { Message = "Verification code sent to your email." });
+		}
+
+		[HttpPost("verify-email")]
+		public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto)
+		{
+			var result = await _authService.VerifyEmailAsync(dto);
+			if (!result) return BadRequest(new { Message = "Invalid or expired OTP." });
+
+			return Ok(new { Message = "Email verified successfully." });
+		}
+
+		[HttpPost("forgot-password")]
+		public async Task<IActionResult> ForgotPassword([FromBody] EmailRequest request)
+		{
+			var token = await _authService.GenerateResetTokenAsync(request.Email);
+			if (token == null) return NotFound(new { Message = "User not found." });
+
+			return Ok(new { Message = "Reset token sent to your email." });
+		}
+
+		[HttpPost("reset-password")]
+		public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+		{
+			var result = await _authService.ResetPasswordAsync(dto);
+			if (!result) return BadRequest(new { Message = "Invalid token or expired." });
+
+			return Ok(new { Message = "Password has been reset successfully." });
+		}
+
+		[HttpPost("logout")]
+		public async Task<IActionResult> Logout([FromBody] EmailRequest request)
+		{
+			var result = await _authService.LogoutAsync(request.Email);
+			if (!result) return NotFound(new { Message = "User not found." });
+
+			return Ok(new { Message = "Logged out successfully." });
+		}
+	}
+}
