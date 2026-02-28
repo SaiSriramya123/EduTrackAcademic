@@ -28,6 +28,9 @@ namespace EduTrackAcademics.Repository
 		Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId);
 		Task UpdateAssessmentAsync(Assessment assessment);
 		Task DeleteAssessmentAsync(Assessment assessment);
+		Task<Submission> GetSubmissionAsync(string studentId, string assessmentId);
+		Task<int> GetTotalMarksAsync(string assessmentId);
+		Task UpdateSubmissionAsync(Submission submission);
 
 		// QUESTIONS
 		Task<string> GenerateQuestionIdAsync();
