@@ -37,14 +37,36 @@ namespace EduTrackAcademics.Repository
 				.Include(a => a.Course)
 				.Select(a => new ViewAssessmentDto
 				{
+					AssessmentID = a.AssessmentID,
+					CourseID = a.CourseID,
 					CourseName = a.Course.CourseName,
-					//AssessmentID = a.AssessmentID,
 					Type = a.Type,
 					MaxMarks = a.MaxMarks,
 					DueDate = a.DueDate,
 					Status = a.Status
 				})
 				.ToListAsync();
+
+			//return assessments;
+			//	var enrollments = await _context.Enrollment
+			//.Where(e => e.StudentId == studentId)
+			//.Include(e => e.Course)                 // Include Course navigation
+			//.ThenInclude(c => c.Assessments)       // Include Assessments of the course
+			//.ToListAsync();
+
+			//	// Flatten assessments into DTO
+			//	var assessments = enrollments
+			//		.SelectMany(e => e.Course.Assessments, (e, a) => new ViewAssessmentDto
+			//		{
+			//			CourseName = e.Course.CourseName,
+			//			AssessmentID = a.AssessmentID,
+			//			Type = a.Type,
+			//			MaxMarks = a.MaxMarks,
+			//			DueDate = a.DueDate,
+			//			Status = a.Status,
+			//			CourseID = a.CourseID
+			//		})
+			//		.ToList();
 
 			return assessments;
 		}
@@ -147,28 +169,36 @@ namespace EduTrackAcademics.Repository
 		// CALCULATE SCORE & PERCENTAGE
 		public async Task<(int score, double percentage)> CalculateScoreAsync(string studentId, string assessmentId)
 		{
+			// Load questions for the assessment
 			var questions = await _context.Questions
 				.Where(q => q.AssessmentId == assessmentId)
 				.ToListAsync();
 
+			// Load student's answers for the assessment
 			var studentAnswers = await _context.StudentAnswer
 				.Where(a => a.StudentId == studentId && a.AssessmentId == assessmentId)
 				.ToListAsync();
 
 			int score = 0;
 
+			// Calculate score based on correct options
 			foreach (var question in questions)
 			{
-				var answer = studentAnswers
-					.FirstOrDefault(a => a.QuestionId == question.QuestionId);
-
+				var answer = studentAnswers.FirstOrDefault(a => a.QuestionId == question.QuestionId);
 				if (answer != null && answer.Answer == question.CorrectOption)
 				{
 					score += question.Marks;
 				}
 			}
 
-			double percentage = questions.Count > 0 ? ((double)score / questions.Count) * 100 : 0;
+			// Retrieve assessment's MaxMarks safely from the Assessments DbSet
+			var assessmentMaxMarks = await _context.Assessments
+				.Where(a => a.AssessmentID == assessmentId)
+				.Select(a => a.MaxMarks)
+				.FirstOrDefaultAsync();
+
+			// Compute percentage, avoid division by zero
+			double percentage = (assessmentMaxMarks > 0) ? ((double)score / assessmentMaxMarks) * 100.0 : 0.0;
 
 			return (score, percentage);
 		}

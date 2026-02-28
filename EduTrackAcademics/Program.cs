@@ -47,8 +47,8 @@ builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
-builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
-builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
+//builder.Services.AddScoped<IStudentProgressesRepository, StudentProgressesRepository>();
+//builder.Services.AddScoped<IStudentProgressesService, StudentProgressesService>();
 //builder.Services.AddSingleton<DummyEnrollment>();
 
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();

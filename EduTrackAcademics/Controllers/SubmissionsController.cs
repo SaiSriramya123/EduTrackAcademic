@@ -24,8 +24,9 @@ namespace EduTrackAcademics.Controllers
 			_service = service;
 		}
 
+		//Student can view the assessments that are belong to that particular studnet id
 		[HttpGet("view-assessments")]
-		public async Task<IActionResult> ViewAssessments(FetchAssessmentDto dto)
+		public async Task<IActionResult> ViewAssessments([FromQuery]FetchAssessmentDto dto)
 		{
 			try
 			{
@@ -56,6 +57,7 @@ namespace EduTrackAcademics.Controllers
 			}
 		}
 
+		//Student can able to start the assesment when it is active and questions will be displayed
 		[HttpGet("start-assessment")]
 		public async Task<IActionResult> StartAssessment(string studentId, string assessmentId)
 		{
@@ -81,6 +83,7 @@ namespace EduTrackAcademics.Controllers
 			}
 		}
 
+		//Student can answer the questions the answers are stored in the Student answer table
 		[HttpPost("answer")]
 		public async Task<IActionResult> InsertOrUpdateAnswer(
 		[FromBody] StudentAnswerDto dto)
@@ -94,6 +97,7 @@ namespace EduTrackAcademics.Controllers
 			});
 		}
 
+		//Submit option is to sumbit the assessment for evaluation 
 		[HttpPost("submit")]
 		public async Task<IActionResult> SubmitAssessment([FromBody] SubmitAssessmentDto dto)
 		{
@@ -119,6 +123,7 @@ namespace EduTrackAcademics.Controllers
 		//	});
 		//}
 
+		//After submission Feedback column is updated and scores are evaluated
 		[HttpPut("UpdateFeedback/Score")]
 		public async Task<IActionResult> UpdateSubmission(UpdateSubmissionDto dto)
 		{

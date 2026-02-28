@@ -631,6 +631,36 @@ namespace EduTrackAcademics.Migrations
                     b.ToTable("StudentAdditionalDetails");
                 });
 
+            modelBuilder.Entity("EduTrackAcademics.Model.StudentAnswer", b =>
+                {
+                    b.Property<string>("StudentAnswerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("AssessmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QuestionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("createdDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("StudentAnswerId");
+
+                    b.ToTable("StudentAnswer");
+                });
+
             modelBuilder.Entity("EduTrackAcademics.Model.StudentBatchAssignment", b =>
                 {
                     b.Property<string>("BatchId")

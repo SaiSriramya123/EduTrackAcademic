@@ -7,7 +7,7 @@ namespace EduTrackAcademics.Model
 	public class StudentBatchAssignment
 	{
 		[Key]
-		public int Id { get; set; } 
+		//public int Id { get; set; } 
 
 		//[Required]
 
