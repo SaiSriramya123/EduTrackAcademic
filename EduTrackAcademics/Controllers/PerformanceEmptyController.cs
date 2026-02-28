@@ -1,6 +1,8 @@
 ﻿using EduTrackAcademics.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Linq.Expressions;
 
 namespace EduTrackAcademics.Controllers
 {
@@ -15,36 +17,38 @@ namespace EduTrackAcademics.Controllers
             _service = service;
         }
 
-        [HttpGet("completion/{enrollmentId}")]
-        public IActionResult GetCompletionPercentage(int enrollmentId)
-        {
-            return Ok(_service.GetCompletionPercentage(enrollmentId));
-        }
+      
         [HttpGet("average/{enrollmentId}")]
-        public IActionResult GetAverageScore(int enrollmentId)
+        public IActionResult GetAverageScore(string enrollmentId)
         {
-            return Ok(_service.GetAverageScore(enrollmentId));
+            var result= _service.GetAverageScore(enrollmentId);
+            return Ok(result);
         }
+
+
         [HttpGet("lastupdated/{enrollmentId}")]
-        public IActionResult GetLastUpdated(int enrollmentId)
+        public IActionResult GetLastUpdated(string enrollmentId)
         {
-            return Ok(_service.GetLastModifiedDate(enrollmentId));
+            var result = _service.GetLastModifiedDate(enrollmentId);
+            return Ok(result);
         }
-        [HttpGet("instructor-batches/{instructorId}")]
 
-        public IActionResult GetInstructorBatches(int instructorId)
+
+
+        [HttpGet("instructor-batches/{instructorId}")]
+        public IActionResult GetInstructorBatches(string instructorId)
 
         {
-
-            var result = _service.GetInstructorBatches(instructorId);
+          var result = _service.GetInstructorBatches(instructorId);
 
             return Ok(result);
-
         }
+
+
 
         [HttpGet("batch-performance/{batchId}")]
 
-        public IActionResult GetBatchPerformance(int batchId)
+        public IActionResult GetBatchPerformance(string batchId)
 
         {
 
@@ -54,6 +58,11 @@ namespace EduTrackAcademics.Controllers
 
         }
 
+        
+
+        }
+
     }
-}
+
+
    

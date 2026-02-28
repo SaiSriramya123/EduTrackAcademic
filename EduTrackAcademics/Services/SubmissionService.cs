@@ -7,7 +7,7 @@ using NuGet.Protocol.Core.Types;
 
 namespace EduTrackAcademics.Services
 {
-	public class SubmissionService: ISubmissionService
+	public class SubmissionService : ISubmissionService
 	{
 		private readonly ISubmissionRepository _repo;
 
@@ -51,6 +51,11 @@ namespace EduTrackAcademics.Services
 			if (assessment.Status != "Open" && assessment.DueDate < DateTime.Now)
 				throw new AssessmentInactiveException("Assessment is not active");
 
+			if (await _repo.IsAssessmentSubmittedAsync(studentId, assessmentId))
+			{
+				throw new AssessmentAttemptedException("Assessment already submitted");
+			}
+
 			// Load questions
 			var questions = await
 				_repo.GetQuestionsByAssessmentIdAsync(assessmentId);
@@ -63,15 +68,25 @@ namespace EduTrackAcademics.Services
 
 		public async Task InsertOrUpdateAnswerAsync(StudentAnswerDto dto)
 		{
+
+			if (await _repo.IsAssessmentSubmittedAsync(dto.StudentId, dto.AssessmentId))
+			{
+				throw new AssessmentAttemptedException("Assessment already submitted");
+			}
+
 			await _repo.InsertOrUpdateAnswerAsync(dto);
 		}
 
 		// Submit Assessment + Calculate Score
 		public async Task<string> SubmitAssessmentAsync(SubmitAssessmentDto dto)
 		{
+			if (await _repo.IsAssessmentSubmittedAsync(dto.StudentId, dto.AssessmentId))
+			{
+				throw new AssessmentAttemptedException("Assessment already submitted");
+			}
 			// Create Submission entry
 			int count = await _repo.GetSubmissionCountAsync();
-			string submissionid= $"SB{(count + 1):D3}";
+			string submissionid = $"SB{(count + 1):D3}";
 			var submission = new Submission
 			{
 				SubmissionId = submissionid,
@@ -94,11 +109,18 @@ namespace EduTrackAcademics.Services
 		//}
 
 		//  Update Feedback and Scores
-		public async Task<(int score,double percentage)> AddFeedbackAsync(UpdateSubmissionDto dto) { 
+		public async Task AddFeedbackAsync(SubmitFeedbackDto dto)
+		{
 
-			var (score, percentage) = await _repo.CalculateScoreAsync(dto.StudentId, dto.AssessmentId);
-			await _repo.UpdateSubmissionAsync(dto.submissionId, dto.score, dto.Feedback);
-			return (score, percentage);
+			await _repo.AddFeedbackAsync(dto);
+			//await _repo.UpdateSubmissionAsync(UpdateSubmissionDto dto);
+			//return res;
+		}
+
+		public async Task<UpdateSubmissionDto> UpdateSubmissionAsync(string studentId,string assessmentId)
+		{
+			var res=await _repo.CalculateScoreAsync(studentId, assessmentId);
+			return await _repo.UpdateSubmissionAsync(res);
 		}
 	}
 }

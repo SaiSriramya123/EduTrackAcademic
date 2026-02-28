@@ -21,8 +21,11 @@ namespace EduTrackAcademics.Repository
 
 		Task<string> SubmitAssessmentAsync(Submission submission);
 
-		Task<(int score, double percentage)> CalculateScoreAsync(string studentId, string assessmentId);
+		Task<UpdateSubmissionDto> CalculateScoreAsync(string studentId, string assessmentId);
 
-		Task UpdateSubmissionAsync(string submissionId, int score, string feedback);
+		Task<UpdateSubmissionDto> UpdateSubmissionAsync(UpdateSubmissionDto dto); 
+
+		Task<bool> IsAssessmentSubmittedAsync(string studentId, string assessmentId);
+		Task AddFeedbackAsync(SubmitFeedbackDto dto);
 	}
 }
