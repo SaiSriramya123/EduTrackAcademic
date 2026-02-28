@@ -15,6 +15,7 @@ namespace EduTrackAcademics.Services
 
 		//Task<(int score, double percentage)> CalculateScoreAsync(SubmitAssessmentDto dto);
 
-		Task<(int score, double percentage)> AddFeedbackAsync(UpdateSubmissionDto dto);
+		Task AddFeedbackAsync(SubmitFeedbackDto dto);
+		Task<UpdateSubmissionDto> UpdateSubmissionAsync(string studendId,string assesmentId);
 	}
 }
