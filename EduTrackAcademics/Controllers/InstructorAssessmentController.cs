@@ -23,8 +23,18 @@ namespace EduTrackAcademics.Controllers
 		// ASSESSMENT
 
 		[HttpPost("assessment")]
-		public async Task<IActionResult> CreateAssessment(AssessmentDTO dto)
-		=> Ok(await _service.CreateAssessmentAsync(dto));
+		public async Task<IActionResult> CreateAssessment([FromBody] AssessmentDTO dto)
+		{
+			if (dto == null)
+			{
+				return BadRequest("Invalid data");
+			}
+			var result=await _service.CreateAssessmentAsync(dto);
+			return Ok(new
+			{
+				Message = result
+			});
+		}
 
 		[HttpGet("assessmentDetails/{id}")]
 		public async Task<IActionResult> GetAssessment(string id)

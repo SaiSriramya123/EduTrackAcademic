@@ -203,6 +203,39 @@ namespace EduTrackAcademics.Services
 			return "Assessment deleted successfully";
 		}
 
+		public async Task<SubmissionResultDTO> AddFeedbackAsync(UpdateSubmissionDto dto)
+		{
+			var submission = await _repo.GetSubmissionAsync(dto.StudentId, dto.AssessmentId);
+
+			if (submission == null)
+			{
+				return new SubmissionResultDTO
+				{
+					IsSubmitted = false,
+					Score = 0,
+					Percentage = 0
+				};
+			}
+			submission.Feedback = dto.Feedback;
+			submission.Score = dto.Score;
+
+			await _repo.UpdateSubmissionAsync(submission);
+
+			var totalMarks = await _repo.GetTotalMarksAsync(dto.AssessmentId);
+			double percentage = 0;
+			if (totalMarks > 0)
+			{
+				percentage = ((double)dto.Score / totalMarks) * 100;
+			}
+
+			return new SubmissionResultDTO
+			{
+				IsSubmitted = true,
+				Score = dto.Score,
+				Percentage = percentage
+			};
+		}
+
 		// QUESTIONS
 
 		public async Task<string> AddQuestionAsync(QuestionDTO dto)

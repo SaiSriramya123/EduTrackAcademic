@@ -146,6 +146,27 @@ namespace EduTrackAcademics.Repository
 
 		}
 
+		public async Task<Submission> GetSubmissionAsync(string studentId, string assessmentId)
+		{
+			return await _context.Submissions
+				.FirstOrDefaultAsync(s =>
+					s.StudentID == studentId &&
+					s.AssessmentId == assessmentId);
+		}
+
+		public async Task<int> GetTotalMarksAsync(string assessmentId)
+		{
+			return await _context.Questions
+				.Where(q => q.AssessmentId == assessmentId)
+				.SumAsync(q => q.Marks);
+		}
+
+		public async Task UpdateSubmissionAsync(Submission submission)
+		{
+			_context.Submission.Update(submission);
+			await _context.SaveChangesAsync();
+		}
+
 		// QUESTIONS
 
 		public async Task<string> GenerateQuestionIdAsync()

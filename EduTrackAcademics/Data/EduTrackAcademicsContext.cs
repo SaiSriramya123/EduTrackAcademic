@@ -61,6 +61,11 @@ namespace EduTrackAcademics.Data
 				.WithMany(e => e.Attendances)
 				.HasForeignKey(a => a.EnrollmentID)
 				.OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<Assessment>()
+				.HasOne(a => a.Course)
+				.WithMany()
+				.HasForeignKey(a => a.CourseID)
+				.HasPrincipalKey(c=>c.CourseId);
 
 		}
 		public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;
