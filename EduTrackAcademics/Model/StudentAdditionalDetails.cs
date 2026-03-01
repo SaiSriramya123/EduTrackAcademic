@@ -14,7 +14,6 @@ namespace EduTrackAcademics.Model
 		public string? Nationality { get; set; }
 		public string? Citizenship { get; set; }
 		public string? DayscholarHosteller { get; set; }
-		public decimal? GateScore { get; set; }
 		public string? Certifications { get; set; }
 		public string? Clubs_Chapters { get; set; }
 		public string? Achievements { get; set; }

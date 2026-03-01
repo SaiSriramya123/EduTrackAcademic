@@ -4,9 +4,10 @@ namespace EduTrackAcademics.Repository
 {
     public interface IAcademicReportRepository
     {
-        
-        List<AcademicReport> GetReport();
-        AcademicReport GetSingleReport(string batchId);
-    }
+
+
+        List<BatchAveragePerformanceDTO> GetAllBatchPerformanceReport();
+
+	}
 }
 

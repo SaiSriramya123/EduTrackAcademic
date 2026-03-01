@@ -1,4 +1,5 @@
 ﻿namespace EduTrackAcademics.Exception
+
 {   
         public class BatchNotFoundException : ApplicationException
         {
@@ -10,3 +11,4 @@
             }
         }  
 }
+

@@ -28,7 +28,7 @@ namespace EduTrackAcademics.Controllers
 			{
 				message = result.message,
 				moduleId = result.module.ModuleID,
-				courseId = result.module.CourseID,
+				courseId = result.module.CourseId,
 				name = result.module.Name,
 				sequenceOrder = result.module.SequenceOrder,
 				learningObjectives = result.module.LearningObjectives

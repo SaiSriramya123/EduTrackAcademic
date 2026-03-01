@@ -27,6 +27,6 @@ namespace EduTrackAcademics.DTO
 		public string InstructorPassword { get; set; }
 
 		[Required(ErrorMessage = "Resume is required")]
-		public IFormFile Resume { get; set; }
+		public IFormFile InstructorResume { get; set; }
 	}
 }

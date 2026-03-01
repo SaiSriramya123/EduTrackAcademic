@@ -38,7 +38,7 @@ namespace EduTrackAcademics.Repository
 		public async Task<List<Module>> GetModulesByCourseAsync(string courseId)
 		{
 			return await _context.Modules
-				.Where(m => m.CourseID == courseId)
+				.Where(m => m.CourseId == courseId)
 				.OrderBy(m => m.SequenceOrder)
 				.ToListAsync();
 		}
@@ -130,7 +130,7 @@ namespace EduTrackAcademics.Repository
 
 		public async Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId)
 			=> await _context.Assessments
-				.Where(a => a.CourseID == courseId)
+				.Where(a => a.CourseId == courseId)
 				.ToListAsync();
 
 		public async Task UpdateAssessmentAsync(Assessment assessment)

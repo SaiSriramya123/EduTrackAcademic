@@ -3,6 +3,7 @@ using EduTrackAcademics.DTO;
 using EduTrackAcademics.Exception;
 using EduTrackAcademics.Model;
 using EduTrackAcademics.Repository;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Services
@@ -25,7 +26,7 @@ namespace EduTrackAcademics.Services
 			var module = new Module
 			{
 				ModuleID = newId,
-				CourseID = dto.CourseId,
+				CourseId = dto.CourseId,
 				Name = dto.Name,
 				SequenceOrder = dto.SequenceOrder,
 				LearningObjectives = dto.LearningObjectives
@@ -43,7 +44,7 @@ namespace EduTrackAcademics.Services
 			return modules.Select(m => new
 			{
 				m.ModuleID,
-				m.CourseID,
+				m.CourseId,
 				m.Name,
 				m.SequenceOrder,
 				m.LearningObjectives
@@ -153,19 +154,23 @@ namespace EduTrackAcademics.Services
 		{
 			var id = await _repo.GenerateAssessmentIdAsync();
 
+			var dueDateUtc = DateTime.SpecifyKind(dto.DueDate, DateTimeKind.Utc);
+
 			var assessment = new Assessment
 			{
 				AssessmentID = id,
-				CourseID = dto.CourseId,
+				CourseId = dto.CourseId,
 				Type = dto.Type,
 				MaxMarks = dto.MaxMarks,
-				DueDate = dto.DueDate,
-				Status = dto.DueDate < DateTime.UtcNow ? "Close" : "Open"
+				DueDate = dueDateUtc,
+				Status = dueDateUtc < DateTime.UtcNow ? "Closed" : "Open"
 			};
 
 			await _repo.AddAssessmentAsync(assessment);
+
 			return $"Assessment created with ID {id} and status {assessment.Status}";
 		}
+
 
 
 		public async Task<Assessment> GetAssessmentByIdAsync(string id)

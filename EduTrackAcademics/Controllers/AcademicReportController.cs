@@ -20,9 +20,9 @@ public class AcademicReportController : ControllerBase
 
     }
 
-    [HttpGet("get-single-report/{batchId}")]
+    [HttpGet("get-single-report")]
 
-    public IActionResult GetSingleReport(string batchId)
+    public IActionResult GetAllBatchPerformanceReport()
 
     {
 
@@ -30,7 +30,7 @@ public class AcademicReportController : ControllerBase
 
         {
 
-            var result = _service.GetSingleReport(batchId);
+            var result = _service.GetAllBatchPerformanceReport();
 
             return Ok(result);
 

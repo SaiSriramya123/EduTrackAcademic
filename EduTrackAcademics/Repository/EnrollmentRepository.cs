@@ -51,7 +51,7 @@ namespace EduTrackAcademics.Repository
 		{
 
 			var modules = await _context.Modules
-			.Where(m => m.CourseID == courseId)
+			.Where(m => m.CourseId == courseId)
 			.OrderBy(m => m.SequenceOrder)
 			.Select(m => new ModuleWithContentDto
 			{
@@ -99,7 +99,7 @@ namespace EduTrackAcademics.Repository
 		public async Task<double> GetCourseProgressPercentageAsync(string studentId, string courseId)
 		{
 			var moduleIds = _context.Modules
-				.Where(m => m.CourseID == courseId)
+				.Where(m => m.CourseId == courseId)
 				.Select(m => m.ModuleID)
 				.ToList();
 

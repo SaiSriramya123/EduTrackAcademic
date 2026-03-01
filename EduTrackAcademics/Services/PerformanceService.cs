@@ -1,6 +1,6 @@
 ﻿using EduTrackAcademics.DTO;
 using EduTrackAcademics.Exception;
-using EduTrackAcademics.Migrations;
+
 using EduTrackAcademics.Model;
 using EduTrackAcademics.Repository;
 using static EduTrackAcademics.Services.PerformanceService;
@@ -12,12 +12,17 @@ namespace EduTrackAcademics.Services
     {
 
         private readonly IPerformanceRepository _repo;
+        public PerformanceService(IPerformanceRepository rep)
+        {
+            _repo = rep;
+        }
+      
 
 
     
-        public decimal GetAverageScore(string studentId)
+        public EnrollmentAverageScoreDTO GetAverageScore(string enrollmentId)
         {
-            return _repo.GetAverageScore(studentId);
+            return _repo.GetAverageScore( enrollmentId);
         }
 
         public BatchPerformanceDTO GetLastModifiedDate(string enrollmentId)
@@ -30,7 +35,7 @@ namespace EduTrackAcademics.Services
             return _repo.GetInstructorBatches(instructorId);
         }
 
-        public List<BatchPerformanceDTO> GetBatchPerformance(string batchId)
+        public BatchAveragePerformanceDTO GetBatchPerformance(string batchId)
         {
             return _repo.GetBatchPerformance(batchId);
         }

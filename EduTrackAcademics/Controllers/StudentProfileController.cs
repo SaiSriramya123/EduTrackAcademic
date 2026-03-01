@@ -6,80 +6,89 @@ using System.Threading.Tasks;
 
 namespace EduTrackAcademics.Controllers
 {
-	[ApiController]
-	[Route("api/profile")]
-	public class StudentProfileController : ControllerBase
-	{
-		private readonly IStudentProfileService _service;
-		public StudentProfileController(IStudentProfileService service)
+		[ApiController]
+		[Route("api/profile")]
+		public class StudentProfileController : ControllerBase
 		{
-			_service = service;
-		}
+			private readonly IStudentProfileService _service;
 
-		[HttpGet("personal-info/{studentId}")]
-		public async Task<IActionResult> GetPersonalInfo(string studentId)
-		{
-			try
+			public StudentProfileController(IStudentProfileService service)
+			{
+				_service = service;
+			}
+
+			[HttpGet("personal-info/{studentId}")]
+			public async Task<IActionResult> GetPersonalInfo(string studentId)
 			{
 				var result = await _service.GetPersonalInfoAsync(studentId);
 				return Ok(result);
 			}
-			catch (ArgumentException ex)
-			{
-				return NotFound(new { Message = ex.Message });
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(new { Message = ex.Message });
-			}
-			catch (System.Exception ex)
-			{
-				return StatusCode(500, new { Message = "An unexpected error occurred.", Details = ex.Message });
-			}
-		}
 
-		[HttpGet("program-details/{studentId}")]
-		public async Task<IActionResult> GetProgramDetails(string studentId)
-		{
-			try
+			[HttpGet("program-details/{studentId}")]
+			public async Task<IActionResult> GetProgramDetails(string studentId)
 			{
 				var result = await _service.GetProgramDetails(studentId);
 				return Ok(result);
 			}
-			catch (ArgumentException ex)
-			{
-				return NotFound(new { Message = ex.Message });
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(new { Message = ex.Message });
-			}
-			catch (System.Exception ex)
-			{
-				return StatusCode(500, new { Message = "An unexpected error occurred.", Details = ex.Message });
-			}
-		}
 
-		[HttpPut("additional-info/{studentId}")]
-		public async Task<IActionResult> UpdateAdditionalInfo(string studentId, [FromBody] StudentAdditionalDetailsDTO dto)
-		{
-			try
+			[HttpPut("additional-info/{studentId}")]
+			public async Task<IActionResult> UpdateAdditionalInfo(string studentId, [FromBody] StudentAdditionalDetailsDTO dto)
 			{
 				await _service.UpdateAdditionalInfo(studentId, dto);
 				return Ok(new { Message = "Additional information updated successfully." });
 			}
-			catch (ArgumentException ex)
+
+			[HttpGet("student-details/{studentId}")]
+			public async Task<IActionResult> GetStudentDetails(string studentId)
 			{
-				return NotFound(new { Message = ex.Message });
+				var student = await _service.GetStudentDetails(studentId);
+
+				return Ok(new
+				{
+					StudentName = student.StudentName,
+					StudentEmail = student.StudentEmail,
+					StudentQualification = student.StudentQualification,
+					StudentProgram = student.StudentProgram,
+					StudentAcademicYear = student.StudentAcademicYear,
+				});
 			}
-			catch (InvalidOperationException ex)
+
+			[HttpGet("credit-points/{studentId}")]
+			public async Task<IActionResult> GetCreditPoints(string studentId)
 			{
-				return BadRequest(new { Message = ex.Message });
+				var credits = await _service.GetCreditPointsAsync(studentId);
+
+				return Ok(new
+				{
+					StudentId = studentId,
+					TotalCredits = credits
+				});
 			}
-			catch (System.Exception ex)
+
+			[HttpGet("assignment-due")]
+			public async Task<IActionResult> GetAssignmentDue(string studentId, string courseId)
 			{
-				return StatusCode(500, new { Message = "An unexpected error occurred.", Details = ex.Message });
+				var assignment = await _service.GetAssignmentDetailsForStudentAsync(studentId, courseId);
+
+				return Ok(new
+				{
+					AssignmentDue = assignment.DueDate,
+					AssignmentType = assignment.Type,
+					CourseName = assignment.CourseName
+				});
+			}
+
+			[HttpGet("audit-log/{studentId}")]
+			public async Task<IActionResult> GetAuditLog(string studentId)
+			{
+				var log = await _service.GetAuditLogAsync(studentId);
+
+				return Ok(new
+				{
+					StudentId = log.StudentId,
+					TimeSpent = log.TimeSpent.ToString(),
+					LoginDate = log.Date.ToShortDateString()
+				});
 			}
 		}
-	}
 }

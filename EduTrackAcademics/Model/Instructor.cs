@@ -9,10 +9,15 @@ namespace EduTrackAcademics.Model
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public string InstructorId { get; set; }
 
+		[ForeignKey("User")] 
+		public int? UserId { get; set; }
+		public Users User { get; set; } // Navigation property to Users
+
 		public string InstructorName { get; set; }
 
 		public string InstructorEmail { get; set; }
 
+		public string Role { get; set; } = "Instructor";
 		public long InstructorPhone { get; set; }
 
 		public string InstructorQualification { get; set; }
@@ -27,7 +32,7 @@ namespace EduTrackAcademics.Model
 
 		public string InstructorPassword { get; set; }
 
-		public string ResumePath { get; set; } // ✅ store path
+		public string ResumePath { get; set; } 
 	}
 }
 
