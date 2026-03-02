@@ -6,24 +6,40 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EduTrackAcademics.Migrations
 {
     /// <inheritdoc />
-    public partial class edu : Migration
+    public partial class lucky3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AuditLog",
+                name: "AcademicReport",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LoginTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LogoutTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ReportId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Scope = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CompletionRate = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    AvgScore = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    DropOutRate = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    GeneratedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuditLog", x => x.Id);
+                    table.PrimaryKey("PK_AcademicReport", x => x.ReportId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AcademicRules",
+                columns: table => new
+                {
+                    RuleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RuleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RuleValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AcademicRules", x => x.RuleId);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,6 +72,37 @@ namespace EduTrackAcademics.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentAnswer",
+                columns: table => new
+                {
+                    StudentAnswerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Answer = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    createdDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    QuestionId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AssessmentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentAnswer", x => x.StudentAnswerId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentLoginHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LoginTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LogoutTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentLoginHistory", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StudentProgress",
                 columns: table => new
                 {
@@ -69,6 +116,22 @@ namespace EduTrackAcademics.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudentProgress", x => x.ProgressID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Submission",
+                columns: table => new
+                {
+                    SubmissionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    Feedback = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    AssessmentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentID = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Submission", x => x.SubmissionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -209,6 +272,30 @@ namespace EduTrackAcademics.Migrations
                         column: x => x.ProgramId,
                         principalTable: "Programs",
                         principalColumn: "ProgramId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Performances",
+                columns: table => new
+                {
+                    ProgressID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EnrollmentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CompletionPercentage = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AvgScore = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    BatchId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InstructorId = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Performances", x => x.ProgressID);
+                    table.ForeignKey(
+                        name: "FK_Performances_Student_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Student",
+                        principalColumn: "StudentId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -453,7 +540,6 @@ namespace EduTrackAcademics.Migrations
                     OptionC = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OptionD = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CorrectOption = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AnswerText = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Marks = table.Column<int>(type: "int", nullable: false),
                     OrderNo = table.Column<int>(type: "int", nullable: false),
                     createdDate = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -521,11 +607,11 @@ namespace EduTrackAcademics.Migrations
                 columns: table => new
                 {
                     AttendanceID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    EnrollmentID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EnrollmentID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BatchId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     SessionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Mode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UpdateReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -535,6 +621,12 @@ namespace EduTrackAcademics.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Attendances", x => x.AttendanceID);
+                    table.ForeignKey(
+                        name: "FK_Attendances_Enrollment_EnrollmentID",
+                        column: x => x.EnrollmentID,
+                        principalTable: "Enrollment",
+                        principalColumn: "EnrollmentId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Attendances_StudentBatchAssignments_BatchId",
                         column: x => x.BatchId,
@@ -557,6 +649,11 @@ namespace EduTrackAcademics.Migrations
                 name: "IX_Attendances_BatchId",
                 table: "Attendances",
                 column: "BatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attendances_EnrollmentID",
+                table: "Attendances",
+                column: "EnrollmentID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contents_ModuleID",
@@ -628,6 +725,11 @@ namespace EduTrackAcademics.Migrations
                 column: "CourseID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Performances_StudentId",
+                table: "Performances",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Programs_QualificationId",
                 table: "Programs",
                 column: "QualificationId");
@@ -674,10 +776,13 @@ namespace EduTrackAcademics.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Attendances");
+                name: "AcademicReport");
 
             migrationBuilder.DropTable(
-                name: "AuditLog");
+                name: "AcademicRules");
+
+            migrationBuilder.DropTable(
+                name: "Attendances");
 
             migrationBuilder.DropTable(
                 name: "Contents");
@@ -689,13 +794,13 @@ namespace EduTrackAcademics.Migrations
                 name: "CourseAssignment");
 
             migrationBuilder.DropTable(
-                name: "Enrollment");
-
-            migrationBuilder.DropTable(
                 name: "InstructorCourseAssignments");
 
             migrationBuilder.DropTable(
                 name: "Notification");
+
+            migrationBuilder.DropTable(
+                name: "Performances");
 
             migrationBuilder.DropTable(
                 name: "Questions");
@@ -704,10 +809,22 @@ namespace EduTrackAcademics.Migrations
                 name: "StudentAdditionalDetails");
 
             migrationBuilder.DropTable(
+                name: "StudentAnswer");
+
+            migrationBuilder.DropTable(
                 name: "StudentCourseAssignments");
 
             migrationBuilder.DropTable(
+                name: "StudentLoginHistory");
+
+            migrationBuilder.DropTable(
                 name: "StudentProgress");
+
+            migrationBuilder.DropTable(
+                name: "Submission");
+
+            migrationBuilder.DropTable(
+                name: "Enrollment");
 
             migrationBuilder.DropTable(
                 name: "StudentBatchAssignments");

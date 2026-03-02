@@ -17,8 +17,6 @@ namespace EduTrackAcademics.Data
 		public DbSet<EduTrackAcademics.Model.Users> Users { get; set; } = default!;
 		public DbSet<EduTrackAcademics.Model.Course> Course { get; set; } = default!;
         public DbSet<EduTrackAcademics.Model.Student> Student { get; set; }
-		public DbSet<EduTrackAcademics.Model.Course> Course { get; set; } = default!;
-		public DbSet<EduTrackAcademics.Model.Student> Student { get; set; }
 		public DbSet<EduTrackAcademics.Model.StudentAdditionalDetails> StudentAdditionalDetails { get; set; }
 		public DbSet<EduTrackAcademics.Model.Submission> Submissions { get; set; }
 		public DbSet<EduTrackAcademics.Model.StudentLoginHistory> AuditLog { get; set; }

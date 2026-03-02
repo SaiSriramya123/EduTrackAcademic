@@ -748,6 +748,36 @@ namespace EduTrackAcademics.Migrations
                     b.ToTable("StudentAdditionalDetails");
                 });
 
+            modelBuilder.Entity("EduTrackAcademics.Model.StudentAnswer", b =>
+                {
+                    b.Property<string>("StudentAnswerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("AssessmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QuestionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("createdDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("StudentAnswerId");
+
+                    b.ToTable("StudentAnswer");
+                });
+
             modelBuilder.Entity("EduTrackAcademics.Model.StudentBatchAssignment", b =>
                 {
                     b.Property<string>("BatchId")
@@ -814,7 +844,7 @@ namespace EduTrackAcademics.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuditLog");
+                    b.ToTable("StudentLoginHistory");
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.StudentProgress", b =>
@@ -843,6 +873,35 @@ namespace EduTrackAcademics.Migrations
                     b.HasKey("ProgressID");
 
                     b.ToTable("StudentProgress");
+                });
+
+            modelBuilder.Entity("EduTrackAcademics.Model.Submission", b =>
+                {
+                    b.Property<string>("SubmissionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AssessmentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudentID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SubmissionId");
+
+                    b.ToTable("Submission");
                 });
 
             modelBuilder.Entity("EduTrackAcademics.Model.Users", b =>
