@@ -47,6 +47,11 @@ namespace EduTrackAcademics.Data
 				.HasMany(q => q.Programs)
 				.WithOne(p => p.Qualification)
 				.HasForeignKey(p => p.QualificationId);
+			modelBuilder.Entity<Assessment>()
+	.HasOne(a => a.Course)
+	.WithMany(c => c.Assessments)
+	.HasForeignKey(a => a.CourseId);
+
 
 			modelBuilder.Entity<ProgramEntity>()
 				.HasMany(p => p.AcademicYears)
@@ -78,9 +83,10 @@ namespace EduTrackAcademics.Data
 				.WithMany(e => e.Attendances)
 				.HasForeignKey(a => a.EnrollmentID)
 				.OnDelete(DeleteBehavior.Restrict);
+
 			modelBuilder.Entity<Assessment>()
 				.HasOne(a => a.Course)
-				.WithMany()
+				.WithMany(c => c.Assessments)
 				.HasForeignKey(a => a.CourseId);
 
 		}

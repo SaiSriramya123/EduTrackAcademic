@@ -13,9 +13,6 @@ namespace EduTrackAcademics.Model
 		[Required]
 		public string CourseId { get; set; }
 
-		[ForeignKey(nameof(CourseId))]
-		public Course Course { get; set; }
-
 		[Required]
 		[RegularExpression(@"^(Assignment|Quiz|Exam)$", ErrorMessage = "Type must be Assignment, Quiz, or Exam.")]
 		public string Type { get; set; }
@@ -33,6 +30,9 @@ namespace EduTrackAcademics.Model
 		public string? Feedback { get; set; }
 		public DateTime CreatedOn { get; set; } = DateTime.Now;
 		public List<Question> Questions { get; set; } = new();
-			
-    }
+
+		[ForeignKey("CourseId")]
+		public Course Course { get; set; }
+
+	}
 }

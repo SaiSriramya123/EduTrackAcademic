@@ -2,5 +2,5 @@
 obj/ 
 bin/ 
 *.csproj.user
+EduTrackAcademics/wwwroot/resumes/*
 
-EduTrackAcademics/wwwroot/resumes/ 

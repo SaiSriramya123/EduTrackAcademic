@@ -102,9 +102,6 @@ namespace EduTrackAcademics.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CourseId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
@@ -131,8 +128,6 @@ namespace EduTrackAcademics.Migrations
                     b.HasKey("AssessmentID");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("CourseId1");
 
                     b.ToTable("Assessments");
                 });
@@ -963,14 +958,10 @@ namespace EduTrackAcademics.Migrations
             modelBuilder.Entity("EduTrackAcademics.Model.Assessment", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Course", "Course")
-                        .WithMany()
+                        .WithMany("Assessments")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("EduTrackAcademics.Model.Course", null)
-                        .WithMany("Assessments")
-                        .HasForeignKey("CourseId1");
 
                     b.Navigation("Course");
                 });
