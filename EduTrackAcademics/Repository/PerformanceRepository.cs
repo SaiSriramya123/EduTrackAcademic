@@ -32,7 +32,7 @@ namespace EduTrackAcademics.Repository
 
 			// 2️⃣ Get assessments
 			var assessments = _context.Assessments
-				.Where(a => a.CourseID == batchInfo.CourseId)
+				.Where(a => a.CourseId == batchInfo.CourseId)
 				.Select(a => new { a.AssessmentID, a.MaxMarks })
 				.ToList();
 
@@ -111,7 +111,7 @@ namespace EduTrackAcademics.Repository
 
 			// 2️⃣ Get all assessments of the course
 			var assessmentIds = _context.Assessments
-				.Where(a => a.CourseID == enrollment.CourseId)
+				.Where(a => a.CourseId == enrollment.CourseId)
 				.Select(a => a.AssessmentID)
 				.ToList();
 
@@ -137,7 +137,7 @@ namespace EduTrackAcademics.Repository
 
 			// 5️⃣ Get total max marks of course
 			decimal totalMaxMarks = _context.Assessments
-				.Where(a => a.CourseID == enrollment.CourseId)
+				.Where(a => a.CourseId == enrollment.CourseId)
 				.Sum(a => (decimal)a.MaxMarks);
 
 			// 6️⃣ Calculate Percentage
@@ -181,7 +181,7 @@ namespace EduTrackAcademics.Repository
 
 			// 2️⃣ Get Assessment IDs for the Course
 			var assessmentIds = _context.Assessments
-				.Where(a => a.CourseID == enrollmentData.CourseId)
+				.Where(a => a.CourseId == enrollmentData.CourseId)
 				.Select(a => a.AssessmentID)
 				.ToList();
 

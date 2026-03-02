@@ -62,7 +62,7 @@ namespace EduTrackAcademics.Dummy
 				new Module
 				{
 					ModuleID = "M001",
-					CourseID = "CSE101",
+					CourseId = "CSE101",
 					Name = "Introduction to C#",
 					SequenceOrder = 1,
 					LearningObjectives = "Basics of C#"
@@ -70,7 +70,7 @@ namespace EduTrackAcademics.Dummy
 				new Module
 				{
 					ModuleID = "M002",
-					CourseID = "CSE101",
+					CourseId = "CSE101",
 					Name = "OOP Concepts",
 					SequenceOrder = 2,
 					LearningObjectives = "Classes & Objects"
@@ -116,7 +116,7 @@ namespace EduTrackAcademics.Dummy
 				new Assessment
 				{
 					AssessmentID = "A001",
-					CourseID = "CSE101",
+					CourseId = "CSE101",
 					Type = "Quiz",
 					MaxMarks = 20,
 					DueDate = DateTime.Today.AddDays(5),

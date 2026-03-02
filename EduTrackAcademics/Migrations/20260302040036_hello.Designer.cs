@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EduTrackAcademics.Migrations
 {
     [DbContext(typeof(EduTrackAcademicsContext))]
-    [Migration("20260228204422_lucky3")]
-    partial class lucky3
+    [Migration("20260302040036_hello")]
+    partial class hello
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,8 +101,11 @@ namespace EduTrackAcademics.Migrations
                     b.Property<string>("AssessmentID")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CourseID")
+                    b.Property<string>("CourseId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CourseId1")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedOn")
@@ -130,7 +133,9 @@ namespace EduTrackAcademics.Migrations
 
                     b.HasKey("AssessmentID");
 
-                    b.HasIndex("CourseID");
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("CourseId1");
 
                     b.ToTable("Assessments");
                 });
@@ -482,7 +487,7 @@ namespace EduTrackAcademics.Migrations
                     b.Property<string>("ModuleID")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CourseID")
+                    b.Property<string>("CourseId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -501,7 +506,7 @@ namespace EduTrackAcademics.Migrations
 
                     b.HasKey("ModuleID");
 
-                    b.HasIndex("CourseID");
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Modules");
                 });
@@ -961,10 +966,14 @@ namespace EduTrackAcademics.Migrations
             modelBuilder.Entity("EduTrackAcademics.Model.Assessment", b =>
                 {
                     b.HasOne("EduTrackAcademics.Model.Course", "Course")
-                        .WithMany("Assessments")
-                        .HasForeignKey("CourseID")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("EduTrackAcademics.Model.Course", null)
+                        .WithMany("Assessments")
+                        .HasForeignKey("CourseId1");
 
                     b.Navigation("Course");
                 });
@@ -1108,7 +1117,7 @@ namespace EduTrackAcademics.Migrations
                 {
                     b.HasOne("EduTrackAcademics.Model.Course", "Course")
                         .WithMany()
-                        .HasForeignKey("CourseID")
+                        .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

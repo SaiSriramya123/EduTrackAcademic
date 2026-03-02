@@ -24,6 +24,7 @@ namespace EduTrackAcademics.Services
 		Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId);
 		Task<string> UpdateAssessmentAsync(string assessmentId, AssessmentDTO dto);
 		Task<string> DeleteAssessmentAsync(string assessmentId);
+		Task<SubmissionResultDTO> AddFeedbackAsync(UpdateSubmissionDto dto);
 
 		// QUESTIONS
 		Task<string> AddQuestionAsync(QuestionDTO dto);

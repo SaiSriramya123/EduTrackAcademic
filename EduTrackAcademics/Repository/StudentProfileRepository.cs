@@ -111,8 +111,8 @@ namespace EduTrackAcademics.Repository
 		public async Task<(DateTime DueDate, string Type, string CourseName)?> GetAssignmentDetailsAsync(string courseId)
 		{
 			var result = await _context.Assessments
-				.Where(a => a.CourseID == courseId && a.Type == "Assignment")
-				.Join(_context.Course, a => a.CourseID, c => c.CourseId, (a, c)
+				.Where(a => a.CourseId == courseId && a.Type == "Assignment")
+				.Join(_context.Course, a => a.CourseId, c => c.CourseId, (a, c)
 				=> new {
 					a.DueDate,
 					a.Type,

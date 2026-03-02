@@ -34,12 +34,12 @@ namespace EduTrackAcademics.Repository
 			.ToListAsync();
 
 			var assessments = await _context.Assessments
-				.Where(a => enrolledCourseIds.Contains(a.CourseID))
+				.Where(a => enrolledCourseIds.Contains(a.CourseId))
 				.Include(a => a.Course)
 				.Select(a => new ViewAssessmentDto
 				{
 					AssessmentID = a.AssessmentID,
-					CourseID = a.CourseID,
+					CourseID = a.CourseId,
 					CourseName = a.Course.CourseName,
 					Type = a.Type,
 					MaxMarks = a.MaxMarks,
@@ -91,7 +91,7 @@ namespace EduTrackAcademics.Repository
 				.Select(a => new ViewAssessmentDto
 				{
 					AssessmentID = a.AssessmentID,
-					CourseID = a.CourseID,
+					CourseID = a.CourseId,
 					Type = a.Type,
 					MaxMarks = a.MaxMarks,
 					DueDate = a.DueDate,

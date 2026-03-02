@@ -11,9 +11,9 @@ namespace EduTrackAcademics.Model
 		public string AssessmentID { get; set; }
 
 		[Required]
-		public string CourseID { get; set; }
+		public string CourseId { get; set; }
 
-		[ForeignKey(nameof(CourseID))]
+		[ForeignKey(nameof(CourseId))]
 		public Course Course { get; set; }
 
 		[Required]

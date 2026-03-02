@@ -38,7 +38,7 @@ namespace EduTrackAcademics.Repository
 		public async Task<List<Module>> GetModulesByCourseAsync(string courseId)
 		{
 			return await _context.Modules
-				.Where(m => m.CourseID == courseId)
+				.Where(m => m.CourseId == courseId)
 				.OrderBy(m => m.SequenceOrder)
 				.ToListAsync();
 		}
@@ -130,7 +130,7 @@ namespace EduTrackAcademics.Repository
 
 		public async Task<List<Assessment>> GetAssessmentsByCourseAsync(string courseId)
 			=> await _context.Assessments
-				.Where(a => a.CourseID == courseId)
+				.Where(a => a.CourseId == courseId)
 				.ToListAsync();
 
 		public async Task UpdateAssessmentAsync(Assessment assessment)
@@ -144,6 +144,27 @@ namespace EduTrackAcademics.Repository
 			_context.Assessments.Remove(assessment);
 			await _context.SaveChangesAsync();
 
+		}
+
+		public async Task<Submission> GetSubmissionAsync(string studentId, string assessmentId)
+		{
+			return await _context.Submissions
+				.FirstOrDefaultAsync(s =>
+					s.StudentID == studentId &&
+					s.AssessmentId == assessmentId);
+		}
+
+		public async Task<int> GetTotalMarksAsync(string assessmentId)
+		{
+			return await _context.Questions
+				.Where(q => q.AssessmentId == assessmentId)
+				.SumAsync(q => q.Marks);
+		}
+
+		public async Task UpdateSubmissionAsync(Submission submission)
+		{
+			_context.Submission.Update(submission);
+			await _context.SaveChangesAsync();
 		}
 
 		// QUESTIONS

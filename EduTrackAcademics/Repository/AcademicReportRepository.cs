@@ -164,7 +164,7 @@ namespace EduTrackAcademics.Repository
 			{
 				// 1️⃣ Get assessments for course
 				var assessments = _context.Assessments
-					.Where(a => a.CourseID == batch.CourseId)
+					.Where(a => a.CourseId == batch.CourseId)
 					.Select(a => new { a.AssessmentID, a.MaxMarks })
 					.ToList();
 

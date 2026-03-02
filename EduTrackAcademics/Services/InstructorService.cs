@@ -26,7 +26,7 @@ namespace EduTrackAcademics.Services
 			var module = new Module
 			{
 				ModuleID = newId,
-				CourseID = dto.CourseId,
+				CourseId = dto.CourseId,
 				Name = dto.Name,
 				SequenceOrder = dto.SequenceOrder,
 				LearningObjectives = dto.LearningObjectives
@@ -44,7 +44,7 @@ namespace EduTrackAcademics.Services
 			return modules.Select(m => new
 			{
 				m.ModuleID,
-				m.CourseID,
+				m.CourseId,
 				m.Name,
 				m.SequenceOrder,
 				m.LearningObjectives
@@ -159,7 +159,7 @@ namespace EduTrackAcademics.Services
 			var assessment = new Assessment
 			{
 				AssessmentID = id,
-				CourseID = dto.CourseId,
+				CourseId = dto.CourseId,
 				Type = dto.Type,
 				MaxMarks = dto.MaxMarks,
 				DueDate = dueDateUtc,
@@ -206,6 +206,39 @@ namespace EduTrackAcademics.Services
 
 			await _repo.DeleteAssessmentAsync(assessment);
 			return "Assessment deleted successfully";
+		}
+
+		public async Task<SubmissionResultDTO> AddFeedbackAsync(UpdateSubmissionDto dto)
+		{
+			var submission = await _repo.GetSubmissionAsync(dto.StudentId, dto.AssessmentId);
+
+			if (submission == null)
+			{
+				return new SubmissionResultDTO
+				{
+					IsSubmitted = false,
+					Score = 0,
+					Percentage = 0
+				};
+			}
+			submission.Feedback = dto.Feedback;
+			submission.Score = dto.Score;
+
+			await _repo.UpdateSubmissionAsync(submission);
+
+			var totalMarks = await _repo.GetTotalMarksAsync(dto.AssessmentId);
+			double percentage = 0;
+			if (totalMarks > 0)
+			{
+				percentage = ((double)dto.Score / totalMarks) * 100;
+			}
+
+			return new SubmissionResultDTO
+			{
+				IsSubmitted = true,
+				Score = dto.Score,
+				Percentage = percentage
+			};
 		}
 
 		// QUESTIONS
