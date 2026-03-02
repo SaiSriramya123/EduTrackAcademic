@@ -81,7 +81,7 @@ namespace EduTrackAcademics.Repository
 				});
 			}
 
-			// 4️⃣ Batch Average Percentage
+			//  Batch Average Percentage
 			decimal batchAveragePercentage = percentageList.Any()
 				? percentageList.Average()
 				: 0;
@@ -100,7 +100,7 @@ namespace EduTrackAcademics.Repository
 		//method for AvgScore
 		public EnrollmentAverageScoreDTO GetAverageScore(string enrollmentId)
 		{
-			// 1️⃣ Get enrollment with student & course
+			// Get enrollment with student & course
 			var enrollment = _context.Enrollment
 				.Include(e => e.Student)
 				.Include(e => e.Course)
@@ -109,7 +109,7 @@ namespace EduTrackAcademics.Repository
 			if (enrollment == null)
 				throw new EnrollmentNotExistsException("Enrollment not found", 404);
 
-			// 2️⃣ Get all assessments of the course
+			// 2 Get all assessments of the course
 			var assessmentIds = _context.Assessments
 				.Where(a => a.CourseId == enrollment.CourseId)
 				.Select(a => a.AssessmentID)
@@ -118,7 +118,7 @@ namespace EduTrackAcademics.Repository
 			if (!assessmentIds.Any())
 				throw new ApplicationException("No assessments found for this course");
 
-			// 3️⃣ Get all submission scores of the student for those assessments
+			//  Get all submission scores of the student for those assessments
 			var scores = _context.Submissions
 				.Where(s =>
 					s.StudentID == enrollment.StudentId &&
@@ -126,7 +126,7 @@ namespace EduTrackAcademics.Repository
 				.Select(s => s.Score)
 				.ToList();
 
-			// 4️⃣ Calculate Total & Average
+			// 4 Calculate Total & Average
 			decimal totalScore = scores.Any()
 				? scores.Sum(s => (decimal)s)
 				: 0;
@@ -135,17 +135,17 @@ namespace EduTrackAcademics.Repository
 				? scores.Average(s => (decimal)s)
 				: 0;
 
-			// 5️⃣ Get total max marks of course
+			//  Get total max marks of course
 			decimal totalMaxMarks = _context.Assessments
 				.Where(a => a.CourseId == enrollment.CourseId)
 				.Sum(a => (decimal)a.MaxMarks);
 
-			// 6️⃣ Calculate Percentage
+			//  Calculate Percentage
 			decimal percentage = totalMaxMarks > 0
 				? (totalScore / totalMaxMarks) * 100
 				: 0;
 
-			// 7️⃣ Return DTO
+			//  Return DTO
 			return new EnrollmentAverageScoreDTO
 			{
 				EnrollmentId = enrollment.EnrollmentId,
@@ -163,7 +163,7 @@ namespace EduTrackAcademics.Repository
 		//method for LastModifiedDate
 		public BatchPerformanceDTO GetLastModifiedDate(string enrollmentId)
 		{
-			// 1️⃣ Get Enrollment + Student + Course
+			//  Get Enrollment + Student + Course
 			var enrollmentData = (from e in _context.Enrollment
 								  join s in _context.Student on e.StudentId equals s.StudentId
 								  join c in _context.Course on e.CourseId equals c.CourseId
@@ -179,7 +179,7 @@ namespace EduTrackAcademics.Repository
 			if (enrollmentData == null)
 				throw new EnrollmentNotExistsException("Enrollment not found", 404);
 
-			// 2️⃣ Get Assessment IDs for the Course
+			//  Get Assessment IDs for the Course
 			var assessmentIds = _context.Assessments
 				.Where(a => a.CourseId == enrollmentData.CourseId)
 				.Select(a => a.AssessmentID)
@@ -188,7 +188,7 @@ namespace EduTrackAcademics.Repository
 			if (!assessmentIds.Any())
 				throw new ApplicationException("No assessments found for course");
 
-			// 3️⃣ Get LAST submission date for those assessments
+			//  Get LAST submission date for those assessments
 			var lastModified = _context.Submission
 				.Where(s => s.StudentID == enrollmentData.StudentId
 						 && assessmentIds.Contains(s.AssessmentId))
@@ -208,6 +208,8 @@ namespace EduTrackAcademics.Repository
 				LastUpdated = lastModified
 			};
 		}
+
+
 		//method for getting Instructor Batches
 
 		public List<InstructorBatchDTO> GetInstructorBatches(string instructorId)
