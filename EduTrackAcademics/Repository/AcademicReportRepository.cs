@@ -159,10 +159,9 @@ namespace EduTrackAcademics.Repository
 				.ToList();
 
 			var result = new List<BatchAveragePerformanceDTO>();
-
 			foreach (var batch in batches)
 			{
-				// 1️⃣ Get assessments for course
+				// Get assessments for course
 				var assessments = _context.Assessments
 					.Where(a => a.CourseId == batch.CourseId)
 					.Select(a => new { a.AssessmentID, a.MaxMarks })
@@ -171,7 +170,7 @@ namespace EduTrackAcademics.Repository
 				decimal totalMaxMarks = assessments.Sum(a => a.MaxMarks);
 				var assessmentIds = assessments.Select(a => a.AssessmentID).ToList();
 
-				// 2️⃣ Get students in batch
+				//  Get students in batch
 				var students = (from sba in _context.StudentBatchAssignments
 								join s in _context.Student on sba.StudentId equals s.StudentId
 								where sba.BatchId == batch.BatchId

@@ -17,9 +17,6 @@ namespace EduTrackAcademics.Services
             _repo = rep;
         }
       
-
-
-    
         public EnrollmentAverageScoreDTO GetAverageScore(string enrollmentId)
         {
             return _repo.GetAverageScore( enrollmentId);
