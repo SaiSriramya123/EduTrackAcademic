@@ -2,6 +2,7 @@
 using EduTrackAcademics.Exception;
 
 using EduTrackAcademics.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace EduTrackAcademics.Service
@@ -14,7 +15,7 @@ namespace EduTrackAcademics.Service
 		{
 			_repo = repo;
 		}
-
+		[Authorize(Roles ="Coordinator")]
 		public IEnumerable<object> GetPrograms()
 		{
 			var data = _repo.GetPrograms();
@@ -23,12 +24,12 @@ namespace EduTrackAcademics.Service
 
 			return data;
 		}
-
+		[Authorize(Roles = "Coordinator")]
 		public IEnumerable<object> GetAcademicYears(string programId)
 		{
 			return _repo.GetAcademicYears(programId);
 		}
-
+		
 		public object AddCourse(CourseDTO dto)
 		{
 			if (dto == null)

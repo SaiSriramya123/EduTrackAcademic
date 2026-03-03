@@ -18,10 +18,8 @@ namespace EduTrackAcademics.Controllers
 			_context = context;
 		}
 
-		// ===========================================
-		// Create notification (roles: Admin, Coordinator, Instructor)
-		// ===========================================
-		[Authorize(Roles = "Admin,Coordinator,Instructor")]
+
+		[Authorize(Roles = "Coordinator,Admin,Instructor")]
 		[HttpPost("create")]
 		public IActionResult CreateNotification([FromBody] NotificationDTO dto)
 		{
@@ -48,9 +46,7 @@ namespace EduTrackAcademics.Controllers
 			});
 		}
 
-		// ===========================================
-		// Get notifications for logged-in user
-		// ===========================================
+		
 		[Authorize]
 		[HttpGet("my-notifications")]
 		public IActionResult GetMyNotifications()
@@ -65,9 +61,7 @@ namespace EduTrackAcademics.Controllers
 			return Ok(notifications);
 		}
 
-		// ===========================================
-		// Mark notification as read
-		// ===========================================
+
 		[Authorize]
 		[HttpPut("{id}/mark-read")]
 		public IActionResult MarkAsRead(string id)
@@ -82,10 +76,7 @@ namespace EduTrackAcademics.Controllers
 			return Ok(new { Message = "Notification marked as read" });
 		}
 
-		// ===========================================
-		// Delete notification (only Admin or creator role)
-		// ===========================================
-		[Authorize(Roles = "Admin,Coordinator,Instructor")]
+		[Authorize(Roles = "Coordinator")]
 		[HttpDelete("{id}")]
 		public IActionResult DeleteNotification(string id)
 		{

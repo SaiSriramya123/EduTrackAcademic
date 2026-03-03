@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using EduTrackAcademics.Model;
+using EduTrackAcademics.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTrackAcademics.Data
 {
@@ -41,8 +42,10 @@ namespace EduTrackAcademics.Data
 		public DbSet<Performance> Performances { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{ 
 
-		{
+		
+		
 			modelBuilder.Entity<Qualification>()
 				.HasMany(q => q.Programs)
 				.WithOne(p => p.Qualification)
@@ -88,6 +91,19 @@ namespace EduTrackAcademics.Data
 				.HasOne(a => a.Course)
 				.WithMany(c => c.Assessments)
 				.HasForeignKey(a => a.CourseId);
+
+			string adminHashedPassword = "$2a$12$zQYc9Zkz5PxyDZ0GmJ3q6Oc0Q4r1Uju9rG0q3JcPlzLzF8qfGZpMe";
+			// <-- Replace this with the actual hash of "Admin@123"
+
+			modelBuilder.Entity<Users>().HasData(new Users
+			{
+				UserId = 1, // Use a fixed ID for seeding
+				Email = "admin@gmail.com",
+				Password = adminHashedPassword,
+				Role = "Admin",
+				IsEmailVerified = true
+			});
+
 
 		}
 		public DbSet<EduTrackAcademics.Model.Enrollment> Enrollment { get; set; } = default!;

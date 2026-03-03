@@ -9,8 +9,8 @@ namespace EduTrackAcademics.Aspects
 	{
 		public override void OnException(ExceptionContext context)
 		{
-			var exceptionType = context.Exception.GetType();
-			var message = context.Exception.Message;
+			var exceptionType = context.Exception.GetType();//returns custom exception class
+			var message = context.Exception.Message;//error message inside class
 
 			// ✅ EXISTING CODE – UNCHANGED
 			if (exceptionType == typeof(EnrollmentNotExistsException))
@@ -18,7 +18,7 @@ namespace EduTrackAcademics.Aspects
 				var result = new NotFoundObjectResult(message);
 				context.Result = result;
 			}
-			else if (exceptionType == typeof(EnrollmentAlreadyExistsException))
+			else if (exceptionType == typeof(EnrollmentAlreadyExistsException))//404 returns
 			{
 				var result = new ConflictObjectResult(message);
 				context.Result = result;
@@ -29,6 +29,7 @@ namespace EduTrackAcademics.Aspects
 			{
 				var result = new NotFoundObjectResult(message);
 				context.Result = result;
+
 			}
 
 			// 🔹 ADDED: Student Exception

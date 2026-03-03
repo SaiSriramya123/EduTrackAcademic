@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EduTrackAcademics.Migrations
 {
     /// <inheritdoc />
-    public partial class edu : Migration
+    public partial class info : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -634,6 +634,11 @@ namespace EduTrackAcademics.Migrations
                         principalColumn: "BatchId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "UserId", "Email", "IsEmailVerified", "OtpExpiry", "Password", "ResetToken", "ResetTokenExpiry", "Role", "VerificationOtp" },
+                values: new object[] { 1, "admin@gmail.com", true, null, "$2a$12$zQYc9Zkz5PxyDZ0GmJ3q6Oc0Q4r1Uju9rG0q3JcPlzLzF8qfGZpMe", null, null, "Admin", null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AcademicYear_ProgramId",

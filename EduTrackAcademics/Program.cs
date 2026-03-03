@@ -1,10 +1,11 @@
 using System.Text;
 using EduTrackAcademics.Aspects;
-using EduTrackAcademics.Aspects;
+
 using EduTrackAcademics.AuthFolder;
-using EduTrackAcademics.AuthFolder;
+
 using EduTrackAcademics.Data;
 using EduTrackAcademics.Dummy;
+using EduTrackAcademics.Model;
 using EduTrackAcademics.Repository;
 using EduTrackAcademics.Service;
 using EduTrackAcademics.Services;
@@ -13,6 +14,11 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.SwaggerGen;
+
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,6 +122,17 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+	var context = scope.ServiceProvider.GetRequiredService<EduTrackAcademicsContext>();
+	var admin = context.Users.FirstOrDefault(u => u.Email == "admin@gmail.com");
+
+	if (admin != null)
+	{
+		admin.Password = BCrypt.Net.BCrypt.HashPassword("Admin@123"); // Recompute fresh hash
+		context.SaveChanges();
+	}
+}
 
 // =======================
 // Middleware
@@ -138,6 +155,6 @@ app.UseAuthorization();
 
 
 app.MapControllers();
-
+ 
 
 app.Run();
